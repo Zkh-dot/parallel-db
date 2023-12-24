@@ -115,6 +115,24 @@ class new_connection:
         new.__cursor = copy.deepcopy(self.__cursor)
         return new
     
+    def __get_table(self, sql_request: str, go_next: bool = True, *args):
+        try:
+            result = pd.read_sql(sql_request.format(*args), self.__connection)
+        except Exception as e:
+            self.__logger.error(e)
+            if not go_next:
+                raise e
+        return result
+    
+    def __exequte(self, sql_request: str, really_try: bool = True, go_next: bool = True, *args):
+        try:
+            self.__cursor.execute(sql_request.format(*args))
+        except Exception as e:
+            if really_try:
+                self.__logger.error(e)
+            if not go_next:
+                raise e
+    
     def new_cursor(self):
         """
         Returns connection obj with new cursor
@@ -122,6 +140,55 @@ class new_connection:
         new = self.__copy__()
         new.__cursor = new.__connection.cursor()
         return new
+    
+    def commit(self, really_try=True):
+        try:
+            self.__cursor.commit()
+            return True
+        except Exception as e:
+            if really_try:
+                self.__logger.error(e)
+            return False
+        
+    def exequte(self, sql_requests: str = None, command_name: str = None, really_try=True, go_next=True, *args):
+        """
+        Executes one or more SQL commands. The commands must be separated by semicolons.
+
+        Args:
+            sql_requests (str): The SQL commands to execute, separated by semicolons.
+            command_name (str, optional): The name of the command to time prediction. Defaults to None.
+            really_try (bool, optional): Whether to log errors. Defaults to True.
+            go_next (bool, optional): Whether to continue executing commands after an error. Defaults to True.
+
+        Returns:
+            pd.DataFrame: The combined result of the queries as a pandas DataFrame. if no select in sql_requests, then empty DataFrame
+        """
+        self.__logger.debug(sql_requests)
+        sql_requests = sql_requests.split(";")
+        result = pd.DataFrame()
+        
+        self.__logger.info("executing {} sql command(s):".format(len(sql_requests) - sql_requests.count("")))
+
+        for req in sql_requests:
+            if command_name is None:
+                local_name = sql_requests[:20]
+            else:
+                local_name = command_name
+                
+            self.__logger.info("{}... predicted runtime = {}".format(req[:20], str(
+                    timedelta(seconds=self.predictor.predict(file=local_name)[-1]))))
+            start = time.time()
+            
+            if req.lower().startswith("select"):
+                self.__logger.debug("select!")
+                result.merge(self.__get_table(req, go_next, *args)) 
+                
+            else:
+                self.__exequte(req, really_try, go_next, *args)
+                      
+            self.predictor.remember(file=local_name, time=time.time() - start)
+        return result
+                
     
     def __disconnect(self):
         """
@@ -138,14 +205,6 @@ class new_connection:
         self.__predictor.save()
         self.__disconnect()
         
-    def commit(self, really_try=True):
-        try:
-            self.__cursor.commit()
-            return True
-        except Exception as e:
-            if really_try:
-                self.__logger.error(e)
-            return False
 
 class connecion:
     predictor = TimePredictor
