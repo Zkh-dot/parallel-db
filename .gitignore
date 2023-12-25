@@ -6,3 +6,5 @@ test*
 
 # файл с кредами
 credos.py
+
+dist/*
