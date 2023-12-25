@@ -1,5 +1,5 @@
 from .connection import connection
-from base_table import base_table
+from ..base.base_table import base_table
 from logging import Logger
 
 

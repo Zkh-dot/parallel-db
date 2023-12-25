@@ -325,14 +325,14 @@ class connection:
     
     def __disconnect(self):
         """
-        Disconnects from the database.
+        Disconnects from .the database.
         """
         del self.cursor
         del self.connection
 
     def __del__(self):
         """
-        Destructor that disconnects from the database.
+        Destructor that disconnects from .the database.
         """
         self.__logger.debug("saving history...")
         self.__predictor.save()
@@ -551,7 +551,7 @@ class old_connecion:
 
     def __disconnect(self):
         """
-        Disconnects from the database
+        Disconnects from .the database
         """
         try:
             self.conn.close()
@@ -568,6 +568,6 @@ class old_connecion:
 
     def __del__(self):
         """
-        Destructor that disconnects from the database.
+        Destructor that disconnects from .the database.
         """
         self.__disconnect()

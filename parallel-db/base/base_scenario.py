@@ -5,13 +5,13 @@ import cx_Oracle as cx
 import pyodbc
 import logging
 import time
-from credos import credos
-from core.db_connection.connection import connecion
-from core.decorators import utils
-from core import logger
-from core.methods import methods
-from core.base_table import base_table
-from core.db_connection.connecton_manager import connecion_factory
+from .credos import credos
+from .core.db_connection.connection import connecion
+from .core.decorators import utils
+from .core import logger
+from .core.methods import methods
+from .core.base_table import base_table
+from .core.db_connection.connecton_manager import connecion_factory
 import warnings
 
 class base_scenario:

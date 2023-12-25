@@ -1,5 +1,12 @@
 [build-system]
-requires = ["hatchling"]
+requires = [
+    "hatchling",
+    "cx-Oracle == 8.3.0",
+    "oracledb == 1.4.2",
+    "pandas", 
+    "rich == 13.7.0",
+    "SQLAlchemy==2.0.23"
+    ]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
@@ -10,11 +17,11 @@ include = [
 
 [project]
 name = "parallel-db"
-version = "0.0.1"
+version = "0.0.1b"
 authors = [
   { name="zkh-dot", email="kernzahar@gmail.com" },
 ]
-description = "Pacage for high level database parallel  automatization"
+description = "Package for high level database parallel  automatization"
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [

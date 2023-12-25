@@ -1,11 +1,11 @@
-from db_connection.connection import connection
+from .db_connection.connection import connection
 import os
 import threading
 import functools
-from rich.progress import Progress
+from .rich.progress import Progress
 import logger
-from db_connection.connecion_factory import connecion_factory
-from logging import Logger
+from .db_connection.connecion_factory import connecion_factory
+from .logging import Logger
 import decorators.utils as utils
 
 class base_table():

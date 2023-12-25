@@ -3,7 +3,7 @@ import pickle
 import os
 from logging import Logger
 # Import the necessary libraries
-# from sklearn.linear_model import LinearRegression
+# from .sklearn.linear_model import LinearRegression
 import numpy as np
 
 
