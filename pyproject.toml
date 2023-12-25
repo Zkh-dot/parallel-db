@@ -11,13 +11,13 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 include = [
-  "parallel-db/*.py",
+  "parallel_db/*.py",
   "/tests",
 ]
 
 [project]
-name = "parallel-db"
-version = "0.0.1b"
+name = "parallel_db"
+version = "0.0.2b"
 authors = [
   { name="zkh-dot", email="kernzahar@gmail.com" },
 ]
