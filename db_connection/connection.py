@@ -12,11 +12,29 @@ from time_predictor.time_predictor import TimePredictor
 from typing import Union
 from inspect import isclass
 
-# класс для создания подключений к базам данных
-class new_connection:
+
+class connection:
+    """
+    A class representing a database connection.
+
+    Args:
+        logger (logging.Logger, optional): The logger object for logging messages.
+        df_connection (Union(pyodbc.Connection, cx.connect), optional): The database connection object.
+        login (str, optional): The login username.
+        password (str, optional): The login password.
+    """
     predictor = TimePredictor
+
     def __init__(self, logger: logging.Logger = None, df_connection: Union(pyodbc.Connection, cx.connect) = None, login: str = None, password: str = None) -> None:
-        # self.
+        """
+        Initializes a connection object.
+
+        Args:
+            logger (logging.Logger, optional): The logger object for logging messages.
+            df_connection (Union(pyodbc.Connection, cx.connect), optional): The database connection object.
+            login (str, optional): The login username.
+            password (str, optional): The login password.
+        """
         self.__login = login
         self.__password = password
         self.__logger = logger
@@ -27,30 +45,60 @@ class new_connection:
     
     @property
     def login(self):
+        """
+        str: The login username.
+        """
         return self.__login
     
     @login.setter
     def login(self, login: str):
+        """
+        Sets the login username.
+
+        Args:
+            login (str): The login username.
+        """
         self.__login = login
         
     @property
     def password(self): 
+        """
+        str: The masked login password.
+        """
         return "*" * len(self.__password)
     
     @password.setter
     def password(self, value):
+        """
+        Sets the login password.
+
+        Args:
+            value (str): The login password.
+        """
         self.__password = value
         
     @property
     def cursor(self):
+        """
+        The database cursor object.
+        """
         return self.__cursor
     
     @cursor.setter
     def cursor(self, value):
+        """
+        Sets the database cursor object.
+
+        Args:
+            value: The database cursor object.
+        """
         self.__cursor = value
     
     @cursor.deleter
     def cursor(self):
+        """
+        Closes the database cursor.
+        """
         try:
             self.__cursor.close()
         except (pyodbc.ProgrammingError, cx.InterfaceError) as error:
@@ -60,9 +108,18 @@ class new_connection:
         
     @property
     def connection(self):
+        """
+        The database connection object.
+        """
         return self.__connection    
         
     def __connect_class(self, db_connection: Union(pyodbc.Connection, cx.connect)):
+        """
+        Connects to the database using a class-based connection object.
+
+        Args:
+            db_connection (Union(pyodbc.Connection, cx.connect)): The class-based database connection object.
+        """
         try:
             self.__connection = db_connection(self.__login, self.__password)
             self.__cursor = self.__connection.cursor()
@@ -71,6 +128,12 @@ class new_connection:
             raise e
             
     def __connect_instance(self, db_connection: Union(pyodbc.Connection, cx.connect)):
+        """
+        Connects to the database using an instance-based connection object.
+
+        Args:
+            db_connection (Union(pyodbc.Connection, cx.connect)): The instance-based database connection object.
+        """
         try:
             self.__connection = db_connection
             self.__cursor = self.__connection.cursor()
@@ -79,6 +142,12 @@ class new_connection:
             raise e 
         
     def __connect_engine(self, db_connection: sqlalchemy.Engine):
+        """
+        Connects to the database using a SQLAlchemy engine.
+
+        Args:
+            db_connection (sqlalchemy.Engine): The SQLAlchemy engine object.
+        """
         try:
             self.__connection = db_connection.connect()
             self.__cursor = self.__connection
@@ -88,6 +157,12 @@ class new_connection:
     
     @connection.setter
     def __connect(self, db_connection: Union(pyodbc.Connection, cx.connect, sqlalchemy.Engine)):
+        """
+        Connects to the database based on the type of connection object.
+
+        Args:
+            db_connection (Union(pyodbc.Connection, cx.connect, sqlalchemy.Engine)): The database connection object.
+        """
         if db_connection is None:
             self.__logger.debug("db_connection is None")
         if isinstance(db_connection, sqlalchemy.Engine):
@@ -99,6 +174,9 @@ class new_connection:
             
     @connection.deleter
     def connection(self):
+        """
+        Closes the database connection.
+        """
         try:
             self.__connection.close()
         except (pyodbc.ProgrammingError, cx.InterfaceError) as error:
@@ -108,14 +186,25 @@ class new_connection:
             
     def __copy__(self):
         """
-        returns copy of obj
+        Returns a copy of the connection object.
         """
-        new = new_connection(self.__logger, None, self.__login, self.__password)
+        new = connection(self.__logger, None, self.__login, self.__password)
         new.connection = self.connection
         new.__cursor = copy.deepcopy(self.__cursor)
         return new
     
     def __get_table(self, sql_request: str, go_next: bool = True, *args):
+        """
+        Executes a SQL query and returns the result as a pandas DataFrame.
+
+        Args:
+            sql_request (str): The SQL query to execute.
+            go_next (bool, optional): Whether to continue executing commands after an error. Defaults to True.
+            *args: Additional keyword arguments to be passed to the SQL query.
+
+        Returns:
+            pd.DataFrame: The result of the query as a pandas DataFrame.
+        """
         try:
             result = pd.read_sql(sql_request.format(*args), self.__connection)
         except Exception as e:
@@ -125,6 +214,15 @@ class new_connection:
         return result
     
     def __exequte(self, sql_request: str, really_try: bool = True, go_next: bool = True, *args):
+        """
+        Executes a SQL command.
+
+        Args:
+            sql_request (str): The SQL command to execute.
+            really_try (bool, optional): Whether to log errors. Defaults to True.
+            go_next (bool, optional): Whether to continue executing commands after an error. Defaults to True.
+            *args: Additional keyword arguments to be passed to the SQL command.
+        """
         try:
             self.__cursor.execute(sql_request.format(*args))
         except Exception as e:
@@ -135,13 +233,22 @@ class new_connection:
     
     def new_cursor(self):
         """
-        Returns connection obj with new cursor
+        Returns same connection with a new cursor.
         """
         new = self.__copy__()
         new.__cursor = new.__connection.cursor()
         return new
     
     def commit(self, really_try=True):
+        """
+        Commits the current transaction.
+
+        Args:
+            really_try (bool, optional): Whether to log errors. Defaults to True.
+
+        Returns:
+            bool: True if the commit was successful, False otherwise.
+        """
         try:
             self.__cursor.commit()
             return True
@@ -159,9 +266,10 @@ class new_connection:
             command_name (str, optional): The name of the command to time prediction. Defaults to None.
             really_try (bool, optional): Whether to log errors. Defaults to True.
             go_next (bool, optional): Whether to continue executing commands after an error. Defaults to True.
+            *args: Additional keyword arguments to be passed to the SQL commands.
 
         Returns:
-            pd.DataFrame: The combined result of the queries as a pandas DataFrame. if no select in sql_requests, then empty DataFrame
+            pd.DataFrame: The combined result of the queries as a pandas DataFrame. If no SELECT statement is present in the SQL commands, an empty DataFrame is returned.
         """
         self.__logger.debug(sql_requests)
         sql_requests = sql_requests.split(";")
@@ -192,7 +300,7 @@ class new_connection:
     
     def __disconnect(self):
         """
-        Disconnects from the database
+        Disconnects from the database.
         """
         del self.cursor
         del self.connection
@@ -206,7 +314,16 @@ class new_connection:
         self.__disconnect()
         
 
-class connecion:
+class old_connecion:
+    """
+    A class representing a database connection (old version).
+
+    Args:
+        logger (logging.Logger): The logger object for logging messages.
+        db (str): The type of database to connect to ('ms', 'pl', 'oracle').
+        login (str, optional): The login username. Defaults to the value of the 'LOGIN' environment variable.
+        password (str, optional): The login password. Defaults to the value of the 'PASSWORD' environment variable.
+    """
     predictor = TimePredictor
 
     def __init__(self, logger: logging.Logger, db: str, login: str = os.getenv('LOGIN'), password: str = os.getenv('PASSWORD')):
@@ -238,6 +355,12 @@ class connecion:
 
     @classmethod
     def set_predictor(cls, logger: logging.Logger):
+        """
+        Sets the time predictor for the connection class.
+
+        Args:
+            logger (logging.Logger): The logger object for logging messages.
+        """
         cls.predictor = TimePredictor(logger)
 
     def credentials(self, login: str, password: str):
@@ -270,7 +393,7 @@ class connecion:
 
     def connect_Oracle(self):
         """
-        Connects to an Oracle database using SQLAlchemy. Not recomended.
+        Connects to an Oracle database using SQLAlchemy. Not recommended.
         """
         conn_str = 'oracle+cx_oracle://' + self.login + \
             ':' + self.password + '@' + 'efjvnerovneb3'
@@ -280,16 +403,16 @@ class connecion:
 
     def copy(self):
         """
-        returns copy of obj
+        Returns a copy of the connection object.
         """
-        new = connecion(self.logger, "", self.login, self.password)
+        new = old_connecion(self.logger, "", self.login, self.password)
         new.conn = self.conn
         new.cursor = copy.deepcopy(self.cursor)
         return new
 
     def new_cursor(self):
         """
-        Returns connection obj with new cursor
+        Returns a new connection object with a new cursor.
         """
         new = self.copy()
         new.cursor = new.conn.cursor()
@@ -317,6 +440,7 @@ class connecion:
                 # TODO: переписать этот кринж
                 local_name = command_name
                 if local_name == None:
+                    local_name = sql_requests[:20]
                     local_name = req[:20]
                 start = time.time()
                 self.logger.info("{}... predicted runtime = {}".format(req[:20], str(
