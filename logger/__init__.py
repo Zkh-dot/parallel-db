@@ -7,6 +7,7 @@ import datetime
 
 __all__ = ["get_logger"]
 
+os.makedirs("logs", exist_ok=True)
 filename = f"logs\\logs_{datetime.datetime.now().strftime('%y-%m-%d_%H-%M')}.log"
 
 logging.basicConfig(format=u'[{asctime} - {levelname}]: {message}\n',

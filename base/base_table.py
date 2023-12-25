@@ -70,17 +70,6 @@ class base_table():
             stage()
 
 
-    # def get_free_position():
-    #     """ Return the minimum possible position """
-    #     with threading.lock:
-    #         free_position = heapq.heappop(free_positions)
-    #     return free_position
-
-    # def return_free_position(position):
-    #     with lock:
-    #         heapq.heappush(free_positions, position)
-
-
     def build_paral(self, progress: Progress):
             self.task = progress.add_task(self.__class__.__name__, total=len(self.stages) * 2)
             threads = []
@@ -96,7 +85,7 @@ class base_table():
                 progress.update(self.task, advance=1)
                 stage()
                 progress.update(self.task, advance=1)                
-                
+          
     @classmethod
     def _put(cls, table):
         cls.table = table
