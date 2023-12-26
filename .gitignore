@@ -1,5 +1,5 @@
 # тестовые файлы
-test*
+test*.*
 
 # файлы оптимизации запусков
 *__pycache__*
@@ -8,3 +8,6 @@ test*
 credos.py
 
 dist/*
+
+history.csv
+.vscode

@@ -1,6 +1,7 @@
 import pandas as pd
 import pickle
 import os
+from ..logger import get_logger
 from logging import Logger
 # Import the necessary libraries
 # from .sklearn.linear_model import LinearRegression
@@ -39,22 +40,22 @@ import numpy as np
 
 class TimePredictor:
     """
-    A class that predicts the time based on the given file, symbols, and datetime.
+    A class that predicts the time based on the given file_name, symbols, and datetime.
 
     Attributes:
         history (pandas.DataFrame): A DataFrame to store the history of predictions.
 
     Methods:
         __init__(self, logger: Logger, history='history.csv'): Initializes the TimePredictor object.
-        predict(self, file: str, symbols=None, datetime=None) -> tuple: Predicts the time based on the given file, symbols, and datetime.
-        remember(self, file: str, time, symbols=None, datetime=None): Records a prediction in the history.
-        save(self): Saves the history to a CSV file.
+        predict(self, file_name: str, symbols=None, datetime=None) -> tuple: Predicts the time based on the given file_name, symbols, and datetime.
+        remember(self, file_name: str, time, symbols=None, datetime=None): Records a prediction in the history.
+        save(self): Saves the history to a CSV file_name.
         __del__(self): Saves the history when the object is deleted.
     """
 
-    history = pd.DataFrame(columns=['file', 'datetime', 'symbols', 'time'])
+    history = pd.DataFrame(columns=['file_name', 'datetime', 'symbols', 'time'])
 
-    def __init__(self, logger: Logger, history_path='history.csv', model_path = 'model.pkl'):
+    def __init__(self, logger: Logger = None, history_path='history.csv', model_path = 'model.pkl'):
         """
         Initializes the TimePredictor object.
 
@@ -68,24 +69,27 @@ class TimePredictor:
         """
         self.history_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), history_path)
         self.model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), model_path)
-        self.logger = logger
+        if logger:
+            self.__logger = logger
+        else:
+            self.__logger = get_logger(self.__class__.__name__, log_consol=False, log_file=False, draw_progress=False)
         try:
             self.history = pd.read_csv(self.history_path)
         except:
-            self.logger.info('Не знающий своего прошлого, не имеет будущего!')
+            self.__logger.info('Не знающий своего прошлого, не имеет будущего!')
         if os.path.exists(self.model_path):
             with open(self.model_path, 'rb') as f:
                 self.model = pickle.load(f)
         else:
-            self.logger.info("Ожидайте средненькое время!")
+            self.__logger.info("Ожидайте средненькое время!")
             self.model = None
 
-    def predict(self, file: str, symbols=None, datetime=None) -> tuple:
+    def predict(self, file_name: str, symbols=None, datetime=None) -> tuple:
         """
-        Predicts the time based on the given file, symbols, and datetime.
+        Predicts the time based on the given file_name, symbols, and datetime.
 
         Args:
-            file (str): The file to predict the time for.
+            file_name (str): The file_name to predict the time for.
             symbols (optional): The symbols to consider for prediction.
             datetime (optional): The datetime to consider for prediction.
 
@@ -93,26 +97,26 @@ class TimePredictor:
             tuple: A tuple containing the prediction result. 
             First element is the status code, second is the predicted time.
         """
-        file.replace('\n', ' ')
+        file_name.replace('\n', ' ')
         if datetime and symbols:
             return (0,)
-        elif not file:
-            self.logger.error('Не указан файл!')
+        elif not file_name:
+            self.__logger.error('Не указан файл!')
             return (0,)
         else:
             
-            if self.history[self.history['file'] == file].shape[0] > 0:
-                return (2, self.history[self.history['file'] == file]['time'].mean())
+            if self.history[self.history['file_name'] == file_name].shape[0] > 0:
+                return (2, self.history[self.history['file_name'] == file_name]['time'].mean())
 
             else:
                 return (0,)
 
-    def remember(self, file: str, time, symbols=None, datetime=None):
+    def remember(self, file_name: str, time, symbols=None, datetime=None):
         """
         Records a prediction in the history.
 
         Args:
-            file (str): The file for which the prediction was made.
+            file_name (str): The file_name for which the prediction was made.
             time: The predicted time.
             symbols (optional): The symbols considered for the prediction.
             datetime (optional): The datetime considered for the prediction.
@@ -120,10 +124,10 @@ class TimePredictor:
         Returns:
             None
         """
-        file.replace('\n', ' ')
-        self.logger.debug("-----> {}".format(file))
-        self.history = pd.concat([self.history, pd.DataFrame({'file': file, 'datetime': datetime, 'symbols': symbols, 'time': time}, index=[0])])
-        # self.history.append({'file': file, 'datetime': datetime, 'symbols': symbols, 'time': time}, ignore_index=True) 
+        file_name.replace('\n', ' ')
+        self.__logger.debug("-----> {}".format(file_name))
+        self.history = pd.concat([self.history, pd.DataFrame({'file_name': file_name, 'datetime': datetime, 'symbols': symbols, 'time': time}, index=[0])])
+        # self.history.append({'file_name': file_name, 'datetime': datetime, 'symbols': symbols, 'time': time}, ignore_index=True) 
 
     def save(self):
         """
@@ -135,9 +139,9 @@ class TimePredictor:
         try:
             self.history.to_csv(self.history_path)
         except ImportError:
-            self.logger.warning("python did not wait 4me ¯\_(ツ)_/¯")
+            self.__logger.warning("python did not wait 4me ¯\_(ツ)_/¯")
         except Exception as e:
-            self.logger.error(e)
+            self.__logger.error(e)
             raise
 
     def __del__(self):
@@ -147,5 +151,5 @@ class TimePredictor:
         Returns:
             None
         """
-        self.logger.warning("Your tables are done, finishing kernel jobs")
+        self.__logger.warning("Your tables are done, finishing kernel jobs")
         self.save()

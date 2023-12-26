@@ -3,10 +3,10 @@ import os
 import threading
 import functools
 from rich.progress import Progress
-import logger
+from .. import logger
 from ..db_connection.connection_factory import connection_factory
 from logging import Logger
-import decorators.utils as utils
+from ..decorators import utils as utils
 
 class base_table():
     table = None

@@ -8,8 +8,9 @@ import pandas as pd
 import sqlalchemy
 import time
 import datetime
+from ..logger import get_logger
 from datetime import timedelta
-from time_predictor.time_predictor import TimePredictor
+from ..time_predictor.time_predictor import TimePredictor
 from typing import Union
 from inspect import isclass
 
@@ -25,8 +26,9 @@ class connection:
         password (str, optional): The login password.
     """
     predictor = TimePredictor
+    connected = False
 
-    def __init__(self, logger: logging.Logger = None, df_connection: Union(pyodbc.Connection, cx.connect) = None, login: str = None, password: str = None) -> None:
+    def __init__(self, logger: logging.Logger = None, df_connection: Union[pyodbc.Connection, cx.connect] = None, login: str = None, password: str = None) -> None:
         """
         Initializes a connection object.
 
@@ -38,11 +40,18 @@ class connection:
         """
         self.__login = login
         self.__password = password
-        self.__logger = logger
+        if logger:
+            self.__logger = logger
+        else:
+            self.__logger = get_logger(self.__class__.__name__, log_consol=False, log_file=False, draw_progress=False)
+        
         self.__connection = None
         self.__cursor = None
-        self.__predictor = TimePredictor(logger)
+        self.predictor = TimePredictor(logger)
         self.connection = df_connection
+        
+    def __switch_state(self):
+        self.connected = not self.connected
     
     @property
     def login(self):
@@ -106,6 +115,9 @@ class connection:
             self.__logger.warning("cursor already closed (•-•)⌐")
         except AttributeError:
             self.__logger.error('cursor does not exist')
+        except Exception as e:
+            self.__logger.error(e)
+            self.__logger.error("Most likely, you are working with unusual db")
         
     @property
     def connection(self):
@@ -114,7 +126,7 @@ class connection:
         """
         return self.__connection    
         
-    def __connect_class(self, db_connection: Union(pyodbc.Connection, cx.connect)):
+    def __connect_class(self, db_connection: Union[pyodbc.Connection, cx.connect]):
         """
         Connects to the database using a class-based connection object.
 
@@ -128,7 +140,7 @@ class connection:
             self.__logger.error(e)
             raise e
             
-    def __connect_instance(self, db_connection: Union(pyodbc.Connection, cx.connect)):
+    def __connect_instance(self, db_connection: Union[pyodbc.Connection, cx.connect]):
         """
         Connects to the database using an instance-based connection object.
 
@@ -157,7 +169,7 @@ class connection:
             raise e
     
     @connection.setter
-    def __connection(self, db_connection: Union(pyodbc.Connection, cx.connect, sqlalchemy.Engine)):
+    def connection(self, db_connection: Union[pyodbc.Connection, cx.connect, sqlalchemy.Engine]):
         """
         Connects to the database based on the type of connection object.
 
@@ -166,12 +178,14 @@ class connection:
         """
         if db_connection is None:
             self.__logger.debug("db_connection is None")
-        if isinstance(db_connection, sqlalchemy.Engine):
+            return
+        elif isinstance(db_connection, sqlalchemy.Engine):
             self.__connect_engine(db_connection)
         elif isclass(db_connection):
             self.__connect_class(db_connection)
         else:
             self.__connect_instance(db_connection)
+        self.__switch_state()
             
     @connection.deleter
     def connection(self):
@@ -212,7 +226,10 @@ class connection:
             self.__logger.error(e)
             if not go_next:
                 raise e
-        return result
+        try:
+            return result
+        except:
+            return pd.DataFrame()
     
     def __exequte(self, sql_request: str, really_try: bool = True, go_next: bool = True, commit: bool = True, *args):
         """
@@ -286,22 +303,22 @@ class connection:
 
         for req in sql_requests:
             if command_name is None:
-                local_name = sql_requests[:20]
+                local_name = req[:20]
             else:
                 local_name = command_name
                 
             self.__logger.info("{}... predicted runtime = {}".format(req[:20], str(
-                    timedelta(seconds=self.predictor.predict(file=local_name)[-1]))))
+                    timedelta(seconds=self.predictor.predict(file_name=local_name)[-1]))))
             start = time.time()
             
             if req.lower().startswith("select"):
                 self.__logger.debug("select!")
-                result.merge(self.__get_table(req, go_next, *args)) 
+                result = self.__get_table(req, go_next, *args)
                 
             else:
                 self.__exequte(req, really_try, go_next, commit, *args)
                       
-            self.predictor.remember(file=local_name, time=time.time() - start)
+            self.predictor.remember(file_name=local_name, time=time.time() - start)
         return result
                 
     @staticmethod
@@ -335,13 +352,17 @@ class connection:
         """
         del self.cursor
         del self.connection
+        self.__switch_state()
+        
+    def close(self):
+        self.__disconnect()
 
     def __del__(self):
         """
         Destructor that disconnects from .the database.
         """
         self.__logger.debug("saving history...")
-        self.__predictor.save()
+        self.predictor.save()
         self.__disconnect()
         
 

@@ -1,5 +1,4 @@
 from .connection import connection
-from ..base.base_table import base_table
 from logging import Logger
 
 
@@ -7,7 +6,7 @@ class connection_factory:
     def __init__(self, connections: dict[str, connection]):
         self.connections = connections
 
-    def connect_table(self, logger: Logger,  table: base_table):
+    def connect_table(self, logger: Logger,  table):
         if not table.connection_name:
             logger.error(
                 "Not declared connection in table {}!".format(table.__name__))
