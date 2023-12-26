@@ -1,5 +1,6 @@
 import unittest
 import sqlite3
+from time import sleep
 
 from parallel_db.base import base_table
 from parallel_db.db_connection.connection import connection
@@ -135,13 +136,15 @@ class TestTable(unittest.TestCase):
         self.assertEqual(df.iloc[1, 1], "test2")
         table.clean()
         con.close()
+        del table
         
     def test_all_exec(self):
         con = connection(logger=None, df_connection=sqlite3.connect("test.db"))
         factory = connection_factory({"sqlite": con})
-        table = factory.connect_table(test_table_up)
-        table.build()
-        df = table.table
+        test_table_up.set_reqs([test_table_down_1, test_table_down_2])
+        loc_table = factory.connect_table(test_table_up)
+        loc_table.build()
+        df = loc_table.table
         self.assertEqual(df.iloc[0, 0], 1)
         self.assertEqual(df.iloc[0, 1], "test")
         self.assertEqual(df.iloc[1, 0], 2)

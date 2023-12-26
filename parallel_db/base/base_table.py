@@ -129,7 +129,20 @@ class base_table():
                 progress.update(self.task, advance=1)
             stage()
             if progress:
-                progress.update(self.task, advance=1)                
+                progress.update(self.task, advance=1)   
+                
+    @classmethod
+    def set_reqs(cls, reqs: list):
+        """
+        Sets the requirements attribute of the base_table class.
+
+        Args:
+            reqs: The requirements.
+
+        Returns:
+            None
+        """
+        cls.requirements = reqs             
           
     @classmethod
     def _put(cls, table):
