@@ -311,7 +311,7 @@ class connection:
                     timedelta(seconds=self.predictor.predict(file_name=local_name)[-1]))))
             start = time.time()
             
-            if req.lower().startswith("select"):
+            if req.lower().replace(' ', "").replace('\n', '').startswith("select"):
                 self.__logger.debug("select!")
                 result = self.__get_table(req, go_next, *args)
                 

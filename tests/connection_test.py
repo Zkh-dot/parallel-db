@@ -7,6 +7,11 @@ from logging import Logger
 from parallel_db.time_predictor.time_predictor import TimePredictor
 
 class TestConnection(unittest.TestCase):
+    def setUp(self) -> None:
+        con = sqlite3.connect("test.db")
+        con.cursor().execute("DROP TABLE IF EXISTS test")
+        
+    
     def test_init(self):
         con = connection(logger=None, login="sa", password="Password123")
         self.assertEqual(con.login, "sa")
@@ -72,5 +77,24 @@ class TestConnection(unittest.TestCase):
         con.exequte("DROP TABLE test")
         con.close()
         
+    def test_execute_many_commands_content(self):
+        con = connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        con.exequte("CREATE TABLE test (id int, name varchar(255))")
+        df = con.exequte("""
+                         INSERT INTO test VALUES (1, 'test');
+                         INSERT INTO test VALUES (2, 'test2');
+                         INSERT INTO test VALUES (3, 'test3');
+                         SELECT * FROM test
+                        """)
+        self.assertEqual(df.iloc[0, 0], 1)
+        self.assertEqual(df.iloc[0, 1], "test")
+        self.assertEqual(df.iloc[1, 0], 2)
+        self.assertEqual(df.iloc[1, 1], "test2")
+        self.assertEqual(df.iloc[2, 0], 3)
+        self.assertEqual(df.iloc[2, 1], "test3")
+        con.exequte("DROP TABLE test")
+        con.close()
+        
+    
 if __name__ == "__main__":
     unittest.main()
