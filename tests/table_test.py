@@ -142,7 +142,6 @@ class TestTable(unittest.TestCase):
         table = factory.connect_table(test_table_up)
         table.build()
         df = table.table
-        print(df)
         self.assertEqual(df.iloc[0, 0], 1)
         self.assertEqual(df.iloc[0, 1], "test")
         self.assertEqual(df.iloc[1, 0], 2)
