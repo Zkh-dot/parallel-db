@@ -3,7 +3,7 @@ from ..base.base_table import base_table
 from logging import Logger
 
 
-class connecion_factory:
+class connection_factory:
     def __init__(self, connections: dict[str, connection]):
         self.connections = connections
 

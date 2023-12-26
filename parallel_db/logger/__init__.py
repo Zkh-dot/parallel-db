@@ -1,22 +1,18 @@
-from .enum import IntEnum
+from enum import IntEnum
 import os
 import logging
-from .typing import Optional
-from .functools import wraps
+from typing import Optional
+from functools import wraps
 import datetime
+from rich.progress import Progress
+
 
 __all__ = ["get_logger"]
 
 os.makedirs("logs", exist_ok=True)
 filename = f"logs\\logs_{datetime.datetime.now().strftime('%y-%m-%d_%H-%M')}.log"
 
-logging.basicConfig(format=u'[{asctime} - {levelname}]: {message}\n',
-                    style='{', level=logging.INFO,
-                    handlers=[
-                        # logging.StreamHandler(),
-                        logging.FileHandler(os.path.join(filename), mode="w", encoding='utf-8'),
-                    ],
-                    encoding = 'utf-8')
+
 
 
 class LoggingLevel(IntEnum):
@@ -27,10 +23,18 @@ class LoggingLevel(IntEnum):
     ERROR = logging.ERROR
     CRITICAL = logging.CRITICAL
 
-
-def get_logger(logger_name: Optional[str] = None):
+def get_logger(logger_name: Optional[str] = None, log_consol = True, log_file = True, draw_progress = True):
+    handlers = []
+    if log_consol:
+        handlers.append(logging.StreamHandler())
+    if log_file:
+        logging.FileHandler(os.path.join(filename), mode="w", encoding='utf-8')
+    logging.basicConfig(format=u'[{asctime} - {levelname}]: {message}\n',
+                    style='{', level=logging.INFO,
+                    handlers=handlers,
+                    encoding = 'utf-8')
     logger = logging.getLogger(logger_name)
-
+        
     # if not logger.hasHandlers(): #
     #     formatter = logging.Formatter(fmt='[{asctime}] {message}\n', style='{')
 

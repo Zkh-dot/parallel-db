@@ -1,6 +1,6 @@
 from .base import base_table
 from .db_connection.default_connections import * 
-from .db_connection.connecion_factory import connecion_factory
+from .db_connection.connection_factory import connection_factory
 from .base.base_scenario import base_scenario
 from .db_connection.connection import connection
 from .decorators.utils import *

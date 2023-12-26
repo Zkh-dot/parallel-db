@@ -5,13 +5,11 @@ import cx_Oracle as cx
 import pyodbc
 import logging
 import time
-from .credos import credos
-from .core.db_connection.connection import connecion
-from .core.decorators import utils
-from .core import logger
-from .core.methods import methods
-from .core.base_table import base_table
-from .core.db_connection.connecton_manager import connecion_factory
+from ..db_connection.connection import connection
+from ..decorators import utils
+from .. import logger
+from .base_table import base_table
+from ..db_connection.connection_factory import connection_factory
 import warnings
 
 class base_scenario:
@@ -38,7 +36,6 @@ class base_scenario:
             None
         """
         self.logger = logger.get_logger(self.__class__.__name__)
-        self.methods = methods()
 
         self.credentials(login, password)
         # создание подключений к базам данных
@@ -47,8 +44,8 @@ class base_scenario:
      
         self.connections = {}
         for connection_name in required_connections:
-            self.connections[connection_name.lower()] = connecion(db=connection_name, logger=self.logger, login=self.login, password=password)
-        self.connection_factory = connecion_factory(self.connections)
+            self.connections[connection_name.lower()] = connection(db=connection_name, logger=self.logger, login=self.login, password=password)
+        self.connection_factory = connection_factory(self.connections)
 
         # userfriendly
         if "ms" in self.connections:
@@ -58,7 +55,7 @@ class base_scenario:
         if "oracle" in self.connections:
             self.oracle_con = self.connections["oracle"]
 
-        connecion.set_predictor(self.logger)
+        connection.set_predictor(self.logger)
         self.__start_loggers()
         
 
