@@ -41,7 +41,10 @@ class base_table():
         if isinstance(db_connection, connection):
             self.connection = connection
         else:
-            raise TypeError("db_connection is not connection")
+            self.__logger.warning("db_connection is not connection!")
+        
+        if not isinstance(connection_factory, connection_factory):
+            raise TypeError("connection_factory is not connection_factory")
         
         for i, table in enumerate(self.requirements):
             self.requirements[i] = connection_factory.connect_table(__logger, table)
