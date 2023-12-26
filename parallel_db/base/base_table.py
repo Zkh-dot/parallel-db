@@ -1,15 +1,16 @@
 from ..db_connection.connection import connection
 import os
 import threading
+import pandas as pd
 import functools
 from rich.progress import Progress
 from .. import logger
 from ..db_connection.connection_factory import connection_factory
 from logging import Logger
 from ..decorators import utils as utils
-
+    
 class base_table():
-    table = None
+    table = pd.DataFrame
     connection_name = str
     requirements = []
     stages = []
@@ -17,7 +18,7 @@ class base_table():
     log_file = True
     draw_progress = True
 
-    def __init__(self, __logger: Logger = None, db_connection: connection = None, connection_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True):
+    def __init__(self, __logger: Logger = None, db_connection: connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True):
         """
         Initializes the base_table object.
 
@@ -39,15 +40,15 @@ class base_table():
             self.__logger = __logger
             
         if isinstance(db_connection, connection):
-            self.connection = connection
+            self.connection = db_connection
         else:
             self.__logger.warning("db_connection is not connection!")
         
-        if not isinstance(connection_factory, connection_factory):
-            raise TypeError("connection_factory is not connection_factory")
+        if not isinstance(con_factory, connection_factory):
+            raise TypeError("con_factory is not connection_factory")
         
         for i, table in enumerate(self.requirements):
-            self.requirements[i] = connection_factory.connect_table(__logger, table)
+            self.requirements[i] = con_factory.connect_table(table)
             
     def __init_subclass__(cls):
         cls.__set_sql_scripts_path()
@@ -64,15 +65,16 @@ class base_table():
         utils.decorate_function_by_name(decorator_with_logger, "read_sql", "pandas")
         utils.decorate_function_by_name(decorator_with_logger, "Cursor.execute", "pyodbc")
         utils.decorate_function_by_name(decorator_with_logger, "DataFrame.to_sql", "pandas")
-            
-    def __set_sql_scripts_path(self):
+    
+    @classmethod        
+    def __set_sql_scripts_path(cls):
         """
         Sets the path to the directory containing SQL scripts.
 
         Returns:
             None
         """
-        self.__sql_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), "sql_scripts")
+        cls.__sql_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), "sql_scripts")
 
     def command(self, script_name: str) -> str:
         """
@@ -125,7 +127,8 @@ class base_table():
         for stage in self.stages:
             if progress:
                 progress.update(self.task, advance=1)
-                stage()
+            stage()
+            if progress:
                 progress.update(self.task, advance=1)                
           
     @classmethod

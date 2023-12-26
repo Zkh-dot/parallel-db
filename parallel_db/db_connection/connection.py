@@ -205,7 +205,7 @@ class connection:
         """
         new = connection(self.__logger, None, self.__login, self.__password)
         new.connection = self.connection
-        new.__cursor = copy.deepcopy(self.__cursor)
+        new.__cursor = None
         return new
     
     def __get_table(self, sql_request: str, go_next: bool = True, *args):

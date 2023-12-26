@@ -2,8 +2,7 @@ import unittest
 import sqlite3
 import pandas as pd
 
-from parallel_db import connection, connection_factory
-from logging import Logger
+from parallel_db import connection
 from parallel_db.time_predictor.time_predictor import TimePredictor
 
 class TestConnection(unittest.TestCase):
