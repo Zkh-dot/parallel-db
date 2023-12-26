@@ -157,7 +157,7 @@ class connection:
             raise e
     
     @connection.setter
-    def __connect(self, db_connection: Union(pyodbc.Connection, cx.connect, sqlalchemy.Engine)):
+    def __connection(self, db_connection: Union(pyodbc.Connection, cx.connect, sqlalchemy.Engine)):
         """
         Connects to the database based on the type of connection object.
 
@@ -214,13 +214,13 @@ class connection:
                 raise e
         return result
     
-    def __exequte(self, sql_request: str, really_try: bool = True, go_next: bool = True, *args):
+    def __exequte(self, sql_request: str, really_try: bool = True, go_next: bool = True, commit: bool = True, *args):
         """
         Executes a SQL command.
 
         Args:
             sql_request (str): The SQL command to execute.
-            really_try (bool, optional): Whether to log errors. Defaults to True.
+            really_try (bool, optional): Whether to raise errors. Defaults to True.
             go_next (bool, optional): Whether to continue executing commands after an error. Defaults to True.
             *args: Additional keyword arguments to be passed to the SQL command.
         """
@@ -228,9 +228,13 @@ class connection:
             self.__cursor.execute(sql_request.format(*args))
         except Exception as e:
             if really_try:
+                raise e
+            else:
                 self.__logger.error(e)
             if not go_next:
                 raise e
+        if commit:
+            self.commit(really_try)
     
     def new_cursor(self):
         """
@@ -245,27 +249,29 @@ class connection:
         Commits the current transaction.
 
         Args:
-            really_try (bool, optional): Whether to log errors. Defaults to True.
+            really_try (bool, optional): Whether to raise errors. Defaults to True.
 
         Returns:
             bool: True if the commit was successful, False otherwise.
         """
         try:
-            self.__cursor.commit()
-            return True
+            self.__connection.commit()
+            self.__logger.info("commited! \\(^ᵕ^ )/ ")
         except Exception as e:
             if really_try:
+                raise(e)
+            else:
                 self.__logger.error(e)
             return False
         
-    def exequte(self, sql_requests: str = None, command_name: str = None, really_try=True, go_next=True, *args):
+    def exequte(self, sql_requests: str = None, command_name: str = None, really_try=True, go_next=True, commit=True, *args):
         """
         Executes one or more SQL commands. The commands must be separated by semicolons.
 
         Args:
             sql_requests (str): The SQL commands to execute, separated by semicolons.
             command_name (str, optional): The name of the command to time prediction. Defaults to None.
-            really_try (bool, optional): Whether to log errors. Defaults to True.
+            really_try (bool, optional): Whether to raise errors. Defaults to True.
             go_next (bool, optional): Whether to continue executing commands after an error. Defaults to True.
             *args: Additional keyword arguments to be passed to the SQL commands.
 
@@ -293,7 +299,7 @@ class connection:
                 result.merge(self.__get_table(req, go_next, *args)) 
                 
             else:
-                self.__exequte(req, really_try, go_next, *args)
+                self.__exequte(req, really_try, go_next, commit, *args)
                       
             self.predictor.remember(file=local_name, time=time.time() - start)
         return result
@@ -480,20 +486,6 @@ class old_connecion:
                 self.logger.error(e)
         return result
 
-    # def get_table(self, sql_request: str):
-    #     """
-    #     Executes a SQL query and returns the result as a pandas DataFrame.
-
-    #     Args:
-    #         sql_request (str): The SQL query to execute.
-
-    #     Returns:
-    #         pd.DataFrame: The result of the query as a pandas DataFrame.
-    #     """
-    #     self.logger.debug(sql_request)
-
-    #     return pd.read_sql(sql_request, self.conn)
-
     def execute(self, sql_requests: str = None, command_name: str = None, really_try=True, go_next=True):
         """
         Executes one or more SQL commands. The commands must be separated by semicolons.
@@ -501,7 +493,7 @@ class old_connecion:
         Args:
             sql_requests (str): The SQL commands to execute, separated by semicolons.
             command_name (str, optional): The name of the command to time prediction. Defaults to None.
-            really_try (bool, optional): Whether to log errors. Defaults to True.
+            really_try (bool, optional): Whether to raise errors. Defaults to True.
             go_next (bool, optional): Whether to continue executing commands after an error. Defaults to True.
 
         Returns:
@@ -541,17 +533,28 @@ class old_connecion:
         return True
 
     def commit(self, really_try=True):
+        """
+        Commits the current transaction.
+
+        Args:
+            really_try (bool, optional): Whether to raise errors. Defaults to True.
+
+        Returns:
+            bool: True if the commit was successful, False otherwise.
+        """
         try:
             self.cursor.commit()
             return True
         except Exception as e:
             if really_try:
+                raise e
+            else:
                 self.logger.error(e)
             return False
 
     def __disconnect(self):
         """
-        Disconnects from .the database
+        Disconnects from the database.
         """
         try:
             self.conn.close()
@@ -568,6 +571,6 @@ class old_connecion:
 
     def __del__(self):
         """
-        Destructor that disconnects from .the database.
+        Destructor that disconnects from the database.
         """
         self.__disconnect()
