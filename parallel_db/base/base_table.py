@@ -1,15 +1,15 @@
-from ..db_connection.connection import connection
+from ..db_connection.connection import Connection
 import os
 import threading
 import pandas as pd
 import functools
-from rich.progress import Progress
+from .abstract_table import AbstractTable
 from .. import logger
 from ..db_connection.connection_factory import connection_factory
 from logging import Logger
 from ..decorators import utils as utils
     
-class base_table():
+class BaseTable(AbstractTable):
     table = pd.DataFrame
     connection_name = str
     requirements = []
@@ -18,18 +18,7 @@ class base_table():
     log_file = True
     draw_progress = True
 
-    def __init__(self, __logger: Logger = None, db_connection: connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True):
-        """
-        Initializes the base_table object.
-
-        Args:
-            __logger (Logger, optional): The logger object. Defaults to None.
-            db_connection (connection, optional): The database connection object. Defaults to None.
-            connection_factory (connection_factory, optional): The connection factory object. Defaults to None.
-
-        Raises:
-            TypeError: If db_connection is not of type connection.
-        """
+    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True):
         self.log_consol = log_consol
         self.log_file = log_file
         self.draw_progress = draw_progress
@@ -39,7 +28,7 @@ class base_table():
         else:
             self.__logger = __logger
             
-        if isinstance(db_connection, connection):
+        if isinstance(db_connection, Connection):
             self.connection = db_connection
         else:
             self.__logger.warning("db_connection is not connection!")
@@ -54,12 +43,6 @@ class base_table():
         cls.__set_sql_scripts_path()
         
     def __create_logger(self):
-        """
-        Creates the logger object and decorates specific functions with logging.
-
-        Returns:
-            None
-        """
         self.__logger = logger.get_logger(self.__class__.__name__, self.log_consol, self.log_file, self.draw_progress)
         decorator_with_logger = functools.partial(logger.trace_call, self.__logger)
         utils.decorate_function_by_name(decorator_with_logger, "read_sql", "pandas")
@@ -68,34 +51,13 @@ class base_table():
     
     @classmethod        
     def __set_sql_scripts_path(cls):
-        """
-        Sets the path to the directory containing SQL scripts.
-
-        Returns:
-            None
-        """
         cls.__sql_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), "sql_scripts")
 
     def command(self, script_name: str) -> str:
-        """
-        Returns the content of an SQL script.
-
-        Args:
-            script_name (str): The name of the SQL script.
-
-        Returns:
-            str: The content of the SQL script.
-        """
         with open(os.path.join(self.__sql_path, script_name), "r", encoding="utf-8") as sql_script:
             return sql_script.read()
 
     def build(self):
-        """
-        Builds the base_table by building its requirements and executing its stages.
-
-        Returns:
-            None
-        """
         for r in self.requirements:
             r.build()
 
@@ -104,12 +66,6 @@ class base_table():
 
 
     def build_paral(self):
-        """
-        Builds the base_table in parallel by building its requirements and executing its stages.
-
-        Returns:
-            None
-        """
         if self.__logger.progress:
             self.task = self.__logger.progress.add_task(self.__class__.__name__, total=len(self.stages) * 2)
         threads = []
@@ -130,26 +86,8 @@ class base_table():
                 
     @classmethod
     def set_reqs(cls, reqs: list):
-        """
-        Sets the requirements attribute of the base_table class.
-
-        Args:
-            reqs: The requirements.
-
-        Returns:
-            None
-        """
         cls.requirements = reqs             
           
     @classmethod
     def _put(cls, table):
-        """
-        Sets the table attribute of the base_table class.
-
-        Args:
-            table: The table object.
-
-        Returns:
-            None
-        """
         cls.table = table

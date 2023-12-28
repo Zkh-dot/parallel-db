@@ -60,9 +60,9 @@ class TimePredictor:
         Initializes the TimePredictor object.
 
         Args:
-            logger (Logger): The logger object for logging messages.
-            history_path (str): better don't.
-            model_path (str): better don't.
+            * logger (Logger): The logger object for logging messages.
+            * history_path (str): better don't.
+            * model_path (str): better don't.
 
         Returns:
             None
@@ -89,9 +89,9 @@ class TimePredictor:
         Predicts the time based on the given file_name, symbols, and datetime.
 
         Args:
-            file_name (str): The file_name to predict the time for.
-            symbols (optional): The symbols to consider for prediction.
-            datetime (optional): The datetime to consider for prediction.
+            * file_name (str): The file_name to predict the time for.
+            * symbols (optional): The symbols to consider for prediction.
+            * datetime (optional): The datetime to consider for prediction.
 
         Returns:
             tuple: A tuple containing the prediction result. 
@@ -116,10 +116,10 @@ class TimePredictor:
         Records a prediction in the history.
 
         Args:
-            file_name (str): The file_name for which the prediction was made.
-            time: The predicted time.
-            symbols (optional): The symbols considered for the prediction.
-            datetime (optional): The datetime considered for the prediction.
+            * file_name (str): The file_name for which the prediction was made.
+            * time: The predicted time.
+            * symbols (optional): The symbols considered for the prediction.
+            * datetime (optional): The datetime considered for the prediction.
 
         Returns:
             None

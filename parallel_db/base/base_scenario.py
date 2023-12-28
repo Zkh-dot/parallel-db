@@ -1,14 +1,9 @@
 import os
-import pandas as pd
 import functools
-import cx_Oracle as cx
-import pyodbc
-import logging
-import time
-from ..db_connection.connection import connection
+from ..db_connection.connection import Connection
 from ..decorators import utils
 from .. import logger
-from .base_table import base_table
+from .abstract_table import AbstractTable
 from ..db_connection.connection_factory import connection_factory
 import warnings
 
@@ -44,7 +39,7 @@ class base_scenario:
      
         self.connections = {}
         for connection_name in required_connections:
-            self.connections[connection_name.lower()] = connection(db=connection_name, logger=self.logger, login=self.login, password=password)
+            self.connections[connection_name.lower()] = Connection(db=connection_name, logger=self.logger, login=self.login, password=password)
         self.connection_factory = connection_factory(self.connections)
 
         # userfriendly
@@ -55,7 +50,7 @@ class base_scenario:
         if "oracle" in self.connections:
             self.oracle_con = self.connections["oracle"]
 
-        connection.set_predictor(self.logger)
+        Connection.set_predictor(self.logger)
         self.__start_loggers()
         
 
@@ -117,7 +112,7 @@ class base_scenario:
             return sql_script.read()
     
 
-    def init_recursively(self, table: base_table) -> base_table:
+    def init_recursively(self, table: AbstractTable) -> AbstractTable:
         """
         function for recursiv initialisation of table and all it's required
         need to be done before any work with table
