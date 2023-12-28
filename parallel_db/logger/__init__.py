@@ -30,6 +30,8 @@ def get_logger(logger_name: Optional[str] = None, log_consol = True, log_file = 
     if log_file:
         logging.FileHandler(os.path.join(filename), mode="w", encoding='utf-8')
         
+    print(handlers)
+        
     logging.basicConfig(format=u'[{asctime} - {levelname}]: {message}\n',
                     style='{', level=logging.INFO,
                     handlers=handlers,

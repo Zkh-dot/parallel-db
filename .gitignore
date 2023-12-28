@@ -11,3 +11,5 @@ dist/*
 
 history.csv
 .vscode
+
+logs_*
