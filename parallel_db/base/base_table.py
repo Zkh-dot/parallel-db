@@ -103,21 +103,18 @@ class base_table():
             stage()
 
 
-    def build_paral(self, progress: Progress = None):
+    def build_paral(self):
         """
         Builds the base_table in parallel by building its requirements and executing its stages.
-
-        Args:
-            progress (Progress, optional): The progress object. Defaults to None.
 
         Returns:
             None
         """
-        if progress:
-            self.task = progress.add_task(self.__class__.__name__, total=len(self.stages) * 2)
+        if self.__logger.progress:
+            self.task = self.__logger.progress.add_task(self.__class__.__name__, total=len(self.stages) * 2)
         threads = []
         for i, r in enumerate(self.requirements):
-            x = threading.Thread(target=r.build_paral, args=(progress,))
+            x = threading.Thread(target=r.build_paral, args=(self.__logger.progress,))
             threads.append(x)
             self.__logger.info(f"Start thread for {r.__class__.__name__} ( ˶ˆ꒳ˆ˵ )")
             x.start()
@@ -125,11 +122,11 @@ class base_table():
             self.__logger.info(f"successfully calculated {self.requirements[index].__class__.__name__} ˶ᵔ ᵕ ᵔ˶")
             thread.join()
         for stage in self.stages:
-            if progress:
-                progress.update(self.task, advance=1)
+            if self.__logger.progress:
+                self.__logger.progress.update(self.task, advance=1)
             stage()
-            if progress:
-                progress.update(self.task, advance=1)   
+            if self.__logger.progress:
+                self.__logger.progress.update(self.task, advance=1)   
                 
     @classmethod
     def set_reqs(cls, reqs: list):

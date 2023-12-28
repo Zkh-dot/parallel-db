@@ -51,12 +51,9 @@ class BaseTable(ABC):
         pass
     
     @abstractmethod
-    def build_paral(self, progress: Progress = None):
+    def build_paral(self):
         """
         Builds the base_table in parallel by building its requirements and executing its stages.
-
-        Args:
-            progress (Progress, optional): The progress object. Defaults to None.
 
         Returns:
             None
