@@ -69,19 +69,24 @@ class BaseTable(AbstractTable):
             stage()
 
 
-    def build_paral(self):
+    def build_paral(self, custom_stages = [], custom_requirements = []):
+        if custom_requirements == []:
+            custom_requirements = self.requirements
+        if custom_stages == []:
+            custom_stages = self.stages 
+            
         if self.__logger.progress:
-            self.task = self.__logger.progress.add_task(self.__class__.__name__, total=len(self.stages) * 2)
+            self.task = self.__logger.progress.add_task(self.__class__.__name__, total=len(custom_stages) * 2)
         threads = []
-        for i, r in enumerate(self.requirements):
+        for i, r in enumerate(custom_requirements):
             x = threading.Thread(target=r.build_paral, args=(self.__logger.progress,))
             threads.append(x)
             self.__logger.info(f"Start thread for {r.__class__.__name__} ( ˶ˆ꒳ˆ˵ )")
             x.start()
         for index, thread in enumerate(threads):
-            self.__logger.info(f"successfully calculated {self.requirements[index].__class__.__name__} ˶ᵔ ᵕ ᵔ˶")
+            self.__logger.info(f"successfully calculated {custom_requirements[index].__class__.__name__} ˶ᵔ ᵕ ᵔ˶")
             thread.join()
-        for stage in self.stages:
+        for stage in custom_stages:
             if self.__logger.progress:
                 self.__logger.progress.update(self.task, advance=1)
             stage()

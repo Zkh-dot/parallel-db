@@ -43,10 +43,14 @@ class AbstractTable(ABC):
         pass
 
     @abstractmethod
-    def build(self):
+    def build(self, custom_stages = [], custom_requirements = []):
         """
         Builds the BaseTable by building its requirements and executing its stages.
-
+        
+            Args:
+                * custom_stages (list, optional): A list of custom stages to be executed. Defaults to an empty list.
+                * custom_requirements (list, optional): A list of custom requirements to be built. Defaults to an empty list.
+        
         Returns:
             None
         """
@@ -58,8 +62,8 @@ class AbstractTable(ABC):
             Builds the BaseTable in parallel by building its requirements and executing its stages.
 
             Args:
-                custom_stages (list, optional): A list of custom stages to be executed. Defaults to an empty list.
-                custom_requirements (list, optional): A list of custom requirements to be built. Defaults to an empty list.
+                * custom_stages (list, optional): A list of custom stages to be executed. Defaults to an empty list.
+                * custom_requirements (list, optional): A list of custom requirements to be built. Defaults to an empty list.
 
             Returns:
                 None
