@@ -57,11 +57,15 @@ class BaseTable(AbstractTable):
         with open(os.path.join(self.__sql_path, script_name), "r", encoding="utf-8") as sql_script:
             return sql_script.read()
 
-    def build(self):
-        for r in self.requirements:
+    def build(self, custom_stages = [], custom_requirements = []):
+        if custom_requirements == []:
+            custom_requirements = self.requirements
+        if custom_stages == []:
+            custom_stages = self.stages
+        for r in custom_requirements:
             r.build()
 
-        for stage in self.stages:
+        for stage in custom_requirements:
             stage()
 
 

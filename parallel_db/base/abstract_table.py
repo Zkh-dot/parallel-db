@@ -53,14 +53,18 @@ class AbstractTable(ABC):
         pass
     
     @abstractmethod
-    def build_paral(self):
-        """
-        Builds the BaseTable in parallel by building its requirements and executing its stages.
+    def build_paral(self, custom_stages = [], custom_requirements = []):
+            """
+            Builds the BaseTable in parallel by building its requirements and executing its stages.
 
-        Returns:
-            None
-        """
-        pass
+            Args:
+                custom_stages (list, optional): A list of custom stages to be executed. Defaults to an empty list.
+                custom_requirements (list, optional): A list of custom requirements to be built. Defaults to an empty list.
+
+            Returns:
+                None
+            """
+            pass
 
     @classmethod
     @abstractmethod
