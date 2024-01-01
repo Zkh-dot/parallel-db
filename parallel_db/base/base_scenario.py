@@ -6,6 +6,53 @@ from .. import logger
 from .abstract_table import AbstractTable
 from ..db_connection.connection_factory import connection_factory
 import warnings
+from abc import ABC
+from ..logger import get_logger
+from typing import Union
+
+
+class new_base_scenario(ABC):
+    """
+    This class represents a base scenario for data proccessing. 
+    Basicly, it gives few more comfortable interfaces for simpler work with sql databases
+
+    Returns:
+        _type_: _description_
+    """
+    def __connect_all_req(self):
+        pass
+    
+    def __init__(self):
+        if logger:
+            self.__logger = logger
+        else:
+            self.__logger = get_logger(self.__class__.__name__, log_consol=False, log_file=False, draw_progress=False)
+        
+    
+    @property
+    def connections(self) -> dict[str, Connection]:
+        return self.con_factory.connections
+    
+    @connections.setter
+    def connections(self, connections: Union(connection_factory, dict[str, Connection])):
+        self.con_factory = connections
+    
+    @property
+    def con_factory(self) -> connection_factory:
+        return self.con_factory
+    
+    @con_factory.setter
+    def con_factory(self, connections: Union(connection_factory, dict[str, Connection])):
+        if isinstance(connections, dict):
+            self.con_factory = connection_factory(connections, self.__logger)
+        elif isinstance(connections, connection_factory):
+            self.con_factory = connections
+        else:
+            raise TypeError
+
+    @con_factory.deleter
+    def con_factory(self):
+        self.con_factory.close_all()
 
 class base_scenario:
     """
