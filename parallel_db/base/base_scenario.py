@@ -10,8 +10,7 @@ from abc import ABC
 from ..logger import get_logger
 from typing import Union
 
-
-class new_base_scenario(ABC):
+class base_scenario(ABC):
     """
     This class represents a base scenario for data proccessing. 
     Basicly, it gives few more comfortable interfaces for simpler work with sql databases
@@ -27,34 +26,61 @@ class new_base_scenario(ABC):
             self.__logger = logger
         else:
             self.__logger = get_logger(self.__class__.__name__, log_consol=False, log_file=False, draw_progress=False)
-        
+        self.__start_loggers()
+    
+    def __start_loggers(self):
+        """
+        Starts the loggers for function tracing.
+
+        Returns:
+            None
+        """
+
+        decorator_with_logger = functools.partial(logger.trace_call, self.__logger)
+        utils.decorate_function_by_name(decorator_with_logger, "read_sql", "pandas")
+        utils.decorate_function_by_name(decorator_with_logger, "Cursor.execute", "pyodbc")
+        utils.decorate_function_by_name(decorator_with_logger, "DataFrame.to_sql", "pandas")
     
     @property
     def connections(self) -> dict[str, Connection]:
-        return self.con_factory.connections
+        return self.__con_factory.connections
     
     @connections.setter
     def connections(self, connections: Union(connection_factory, dict[str, Connection])):
-        self.con_factory = connections
+        self.__con_factory = connections
     
+    # not shure, if con_factory should be public
     @property
     def con_factory(self) -> connection_factory:
-        return self.con_factory
+        return self.__con_factory
     
     @con_factory.setter
     def con_factory(self, connections: Union(connection_factory, dict[str, Connection])):
         if isinstance(connections, dict):
-            self.con_factory = connection_factory(connections, self.__logger)
+            self.__con_factory = connection_factory(connections, self.__logger)
         elif isinstance(connections, connection_factory):
-            self.con_factory = connections
+            self.__con_factory = connections
         else:
             raise TypeError
 
     @con_factory.deleter
     def con_factory(self):
-        self.con_factory.close_all()
+        self.close_connections()
+        
+    @property
+    def tables(self):
+        return self.tables
+    
+    @tables.setter
+    def tables(self, tables = dict[str, AbstractTable]):
+        self.tables = tables
+        for table in self.tables:
+            table = self.__con_factory.connect_table(table)
+        
+    def close_connections(self):
+        self.__con_factory.close_all()
 
-class base_scenario:
+class old_base_scenario:
     """
     This class represents a base scenario for data processing.
 
