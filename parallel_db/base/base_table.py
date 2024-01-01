@@ -65,7 +65,7 @@ class BaseTable(AbstractTable):
         for r in custom_requirements:
             r.build()
 
-        for stage in custom_requirements:
+        for stage in custom_stages:
             stage()
 
 

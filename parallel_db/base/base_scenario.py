@@ -2,12 +2,12 @@ import os
 import functools
 from ..db_connection.connection import Connection
 from ..decorators import utils
-from .. import logger
+from logging import Logger
 from .abstract_table import AbstractTable
 from ..db_connection.connection_factory import connection_factory
 import warnings
 from abc import ABC
-from ..logger import get_logger
+from ..logger import get_logger, trace_call
 from typing import Union
 
 class base_scenario(ABC):
@@ -21,7 +21,7 @@ class base_scenario(ABC):
     def __connect_all_req(self):
         pass
     
-    def __init__(self):
+    def __init__(self, logger: Logger = None, connections: dict[str, Connection] = None, con_factory: connection_factory = None, tables: dict[str, AbstractTable] = None):
         if logger:
             self.__logger = logger
         else:
@@ -36,7 +36,7 @@ class base_scenario(ABC):
             None
         """
 
-        decorator_with_logger = functools.partial(logger.trace_call, self.__logger)
+        decorator_with_logger = functools.partial(trace_call, self.__logger)
         utils.decorate_function_by_name(decorator_with_logger, "read_sql", "pandas")
         utils.decorate_function_by_name(decorator_with_logger, "Cursor.execute", "pyodbc")
         utils.decorate_function_by_name(decorator_with_logger, "DataFrame.to_sql", "pandas")

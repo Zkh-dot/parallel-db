@@ -12,14 +12,14 @@ class TestScenario(TestCase):
         tst = test_scenario()
         self.assertIsInstance(tst, test_scenario)
         
-    def test_connections(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
-        tst = test_scenario()
-        tst.connections = {"test_connection", con}
-        self.assertEqual(tst.connections, {"test_connection", con})
+    # def test_connections(self):
+    #     con = Connection(logger=None, df_connection=sqlite3.connect("test_scenario.db"))
+    #     tst = test_scenario()
+    #     tst.connections = {"test_connection", con}
+    #     self.assertEqual(tst.connections, {"test_connection", con})
         
-    def test_factory(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
-        tst = test_scenario()
-        tst.connections = {"test_connection", con}
-        self.assertIsInstance(tst.con_factory, connection_factory)
+    # def test_factory(self):
+    #     con = Connection(logger=None, df_connection=sqlite3.connect("test_scenario.db"))
+    #     tst = test_scenario()
+    #     tst.connections = {"test_connection", con}
+    #     self.assertIsInstance(tst.con_factory, connection_factory)

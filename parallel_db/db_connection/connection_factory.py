@@ -10,30 +10,30 @@ class connection_factory:
     def __init__(self, connections: dict[str, Connection], logger: Logger = None):
         self.connections = connections
         if logger:
-            self.logger = logger
+            self.__logger = logger
         else:
-            self.logger = get_logger(self.__class__.__name__, False, False, False)
+            self.__logger = get_logger(self.__class__.__name__, False, False, False)
             
     def add_connection(self, connection_name: str, connection: Connection):
         self.connections[connection_name] = connection
 
     def connect_table(self,  table) -> AbstractTable:
         if not table.connection_name:
-            self.logger.error(
+            self.__logger.error(
                 "Not declared connection in table {}!".format(table.__name__))
             raise KeyError
         try:
-            table = table(self.logger, self.connections[table.connection_name.lower()], self)
+            table = table(self.__logger, self.connections[table.connection_name.lower()], self)
         except KeyError:
             if Connection == None:
-                self.logger.error(
+                self.__logger.error(
                     "No connection in table {}!".format(table.__name__))
             else:
-                self.logger.error(
+                self.__logger.error(
                     "Not supported connection in table {}: {}!".format(table.__name__, table.connection_name))
                 raise KeyError
         except Exception as e:
-            self.logger.error("something went wrong")
+            self.__logger.error("something went wrong")
             raise NotImplementedError(e)
         return table
 

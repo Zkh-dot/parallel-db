@@ -1,5 +1,6 @@
 import unittest
 import sqlite3
+import os 
 from time import sleep
 
 from parallel_db.base import BaseTable
@@ -13,16 +14,16 @@ class test_table_down_1(BaseTable):
         self.stages = [self.create_table, self.insert]
         
     def create_table(self):
-        self.connection.exequte("CREATE TABLE test (id int, name varchar(255))")
+        self.connection.exequte("CREATE TABLE test_1 (id int, name varchar(255))")
         
     def insert(self):
-        self.connection.exequte("INSERT INTO test VALUES (1, 'test')")
-        self.connection.exequte("INSERT INTO test VALUES (2, 'test2')")
+        self.connection.exequte("INSERT INTO test_1 VALUES (1, 'test_1')")
+        self.connection.exequte("INSERT INTO test_1 VALUES (2, 'test2')")
         print("insert")
     
     def clean(self):
         print("clean")
-        self.connection.exequte("DROP TABLE test")
+        self.connection.exequte("DROP TABLE test_1")
 
 class test_table_down_2(BaseTable):
     connection_name = "sqlite"
@@ -54,7 +55,7 @@ class test_table_up(BaseTable):
         self.connection.exequte("CREATE TABLE test_up (id int, name varchar(255))")
         
     def insert(self):
-        self.connection.exequte("INSERT INTO test_up SELECT * FROM test")
+        self.connection.exequte("INSERT INTO test_up SELECT * FROM test_1")
         self.connection.exequte("INSERT INTO test_up SELECT * FROM test_2")
         
     def select(self):
@@ -112,26 +113,28 @@ class TestTable(unittest.TestCase):
     #     self.assertEqual(table.command("insert_4.sql"), "INSERT INTO test VALUES (4, 'test4')")
      
     def test_one_table_exec(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        con = Connection(logger=None, df_connection=sqlite3.connect("test_1.db"))
         factory = connection_factory({"sqlite": con})
         table = factory.connect_table(test_table_down_1)
         table.build()
-        df = con.exequte("SELECT * FROM test")
+        df = con.exequte("SELECT * FROM test_1")
+        print("------>", df)
         self.assertEqual(df.iloc[0, 0], 1)
-        self.assertEqual(df.iloc[0, 1], "test")
+        self.assertEqual(df.iloc[0, 1], "test_1")
         self.assertEqual(df.iloc[1, 0], 2)
         self.assertEqual(df.iloc[1, 1], "test2")
         table.clean()
         con.close()
         
     def test_paral_one_table_exec(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        con = Connection(logger=None, df_connection=sqlite3.connect("test_2.db"))
         factory = connection_factory({"sqlite": con})
         table = factory.connect_table(test_table_down_1)
         table.build_paral()
-        df = con.exequte("SELECT * FROM test")
+        df = con.exequte("SELECT * FROM test_1")
+        print("------>", df)
         self.assertEqual(df.iloc[0, 0], 1)
-        self.assertEqual(df.iloc[0, 1], "test")
+        self.assertEqual(df.iloc[0, 1], "test_1")
         self.assertEqual(df.iloc[1, 0], 2)
         self.assertEqual(df.iloc[1, 1], "test2")
         table.clean()
@@ -139,14 +142,15 @@ class TestTable(unittest.TestCase):
         del table
         
     def test_all_exec(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        con = Connection(logger=None, df_connection=sqlite3.connect("test_up.db"))
         factory = connection_factory({"sqlite": con})
         test_table_up.set_reqs([test_table_down_1, test_table_down_2])
         loc_table = factory.connect_table(test_table_up)
         loc_table.build()
         df = loc_table.table
+        print("------>", df)
         self.assertEqual(df.iloc[0, 0], 1)
-        self.assertEqual(df.iloc[0, 1], "test")
+        self.assertEqual(df.iloc[0, 1], "test_1")
         self.assertEqual(df.iloc[1, 0], 2)
         self.assertEqual(df.iloc[1, 1], "test2")
         self.assertEqual(df.iloc[2, 0], 3)
