@@ -13,7 +13,7 @@ def oracle_connection(username: str, password: str, con_line: str, encoding: str
         * encoding (str, optional): The encoding to use for the connection. Defaults to 'UTF-8'.
 
     Returns:
-        * cx_Oracle.Connection: The connection object.
+        * oracledb.Connection: The connection object.
 
     """
     return oracledb.connect(username, password, f'{con_line}', encoding=encoding)

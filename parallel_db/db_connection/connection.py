@@ -1,5 +1,5 @@
 # _*_ coding: utf-8 _*_
-import cx_Oracle as cx
+import oracledb
 import pyodbc
 import os
 import copy
@@ -21,20 +21,20 @@ class Connection:
 
     Args:
         * logger (logging.Logger, optional): The logger object for logging messages.
-        * df_connection (Union(pyodbc.Connection, cx.connect), optional): The database connection object.
+        * df_connection (Union(pyodbc.Connection, oracledb.Connection), optional): The database connection object.
         * login (str, optional): The login username.
         * password (str, optional): The login password.
     """
     predictor = TimePredictor
     connected = False
 
-    def __init__(self, logger: logging.Logger = None, df_connection: Union[pyodbc.Connection, cx.connect] = None, login: str = None, password: str = None) -> None:
+    def __init__(self, logger: logging.Logger = None, df_connection: Union[pyodbc.Connection, oracledb.Connection] = None, login: str = None, password: str = None) -> None:
         """
         Initializes a connection object.
 
         Args:
             * logger (logging.Logger, optional): The logger object for logging messages.
-            * df_connection (Union(pyodbc.Connection, cx.connect), optional): The database connection object.
+            * df_connection (Union(pyodbc.Connection, oracledb.Connection), optional): The database connection object.
             * login (str, optional): The login username.
             * password (str, optional): The login password.
         """
@@ -111,7 +111,7 @@ class Connection:
         """
         try:
             self.__cursor.close()
-        except (pyodbc.ProgrammingError, cx.InterfaceError) as error:
+        except (pyodbc.ProgrammingError, ) as error:
             self.__logger.warning("cursor already closed (•-•)⌐")
         except AttributeError:
             self.__logger.error('cursor does not exist')
@@ -126,12 +126,12 @@ class Connection:
         """
         return self.__connection    
         
-    def __connect_class(self, db_connection: Union[pyodbc.Connection, cx.connect]):
+    def __connect_class(self, db_connection: Union[pyodbc.Connection, oracledb.Connection]):
         """
         Connects to the database using a class-based connection object.
 
         Args:
-            * db_connection (Union(pyodbc.Connection, cx.connect)): The class-based database connection object.
+            * db_connection (Union(pyodbc.Connection, oracledb.Connection)): The class-based database connection object.
         """
         try:
             self.__connection = db_connection(self.__login, self.__password)
@@ -140,12 +140,12 @@ class Connection:
             self.__logger.error(e)
             raise e
             
-    def __connect_instance(self, db_connection: Union[pyodbc.Connection, cx.connect]):
+    def __connect_instance(self, db_connection: Union[pyodbc.Connection, oracledb.Connection]):
         """
         Connects to the database using an instance-based connection object.
 
         Args:
-            * db_connection (Union(pyodbc.Connection, cx.connect)): The instance-based database connection object.
+            * db_connection (Union(pyodbc.Connection, oracledb.Connection)): The instance-based database connection object.
         """
         try:
             self.__connection = db_connection
@@ -169,12 +169,12 @@ class Connection:
             raise e
     
     @connection.setter
-    def connection(self, db_connection: Union[pyodbc.Connection, cx.connect, sqlalchemy.Engine]):
+    def connection(self, db_connection: Union[pyodbc.Connection, oracledb.Connection, sqlalchemy.Engine]):
         """
         Connects to the database based on the type of connection object.
 
         Args:
-            * db_connection (Union(pyodbc.Connection, cx.connect, sqlalchemy.Engine)): The database connection object.
+            * db_connection (Union(pyodbc.Connection, oracledb.Connection, sqlalchemy.Engine)): The database connection object.
         """
         if db_connection is None:
             self.__logger.debug("db_connection is None")
@@ -194,7 +194,7 @@ class Connection:
         """
         try:
             self.__connection.close()
-        except (pyodbc.ProgrammingError, cx.InterfaceError) as error:
+        except (pyodbc.ProgrammingError, oracledb.InterfaceError) as error:
             self.__logger.error("connection already closed \\(°Ω°)/")
         except AttributeError:
             self.__logger.error('connection does not exist')
