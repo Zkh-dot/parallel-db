@@ -1,7 +1,9 @@
 import pyodbc
 import cx_Oracle as cx
+import oracledb
 import sqlite3
 import sqlalchemy
+from .connection import Connection
 
 def oracle_connection(username: str, password: str, con_line: str, encoding: str = 'UTF-8'):
     """
@@ -17,7 +19,7 @@ def oracle_connection(username: str, password: str, con_line: str, encoding: str
         * cx_Oracle.Connection: The connection object.
 
     """
-    return cx.connect(username, password, f'{con_line}', encoding=encoding)
+    return oracledb.connect(username, password, f'{con_line}', encoding=encoding)
 
 def mssql_connection(username: str = None, password: str = None, driver: str = 'SQL Server', server: str = '', database: str = "", thusted_connection: str = "yes", encoding: str = 'utf-16le', *args):
     """
