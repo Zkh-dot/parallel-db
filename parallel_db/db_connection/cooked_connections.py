@@ -1,8 +1,12 @@
+from .default_connections import *
+from connection import Connection
+
 import pyodbc
 import oracledb
 import sqlalchemy
 
-def oracle_connection(username: str, password: str, con_line: str, encoding: str = 'UTF-8'):
+
+def oracle_connection(username: str, password: str, con_line: str, encoding: str = 'UTF-8', logger = None):
     """
     Establishes a connection to an Oracle database.
 
@@ -13,12 +17,12 @@ def oracle_connection(username: str, password: str, con_line: str, encoding: str
         * encoding (str, optional): The encoding to use for the connection. Defaults to 'UTF-8'.
 
     Returns:
-        * cx_Oracle.Connection: The connection object.
+        * Connection object
 
     """
-    return oracledb.connect(username, password, f'{con_line}', encoding=encoding)
+    return Connection(logger=logger, df_connection=oracledb.connect(username, password, f'{con_line}', encoding=encoding))
 
-def mssql_connection(username: str = None, password: str = None, driver: str = 'SQL Server', server: str = '', database: str = "", thusted_connection: str = "yes", encoding: str = 'utf-16le', *args):
+def mssql_connection(username: str = None, password: str = None, driver: str = 'SQL Server', server: str = '', database: str = "", thusted_connection: str = "yes", encoding: str = 'utf-16le', logger = None, *args):
     """
     Establishes a connection to a Microsoft SQL Server database.
 
@@ -33,14 +37,14 @@ def mssql_connection(username: str = None, password: str = None, driver: str = '
         * *args: Additional arguments for the connection string.
 
     Returns:
-        * pyodbc.Connection: The connection object.
+        * Connection object
 
     """
     if username is None and password is None:
-        return pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection={thusted_connection}', encoding=encoding)
-    return pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Trusted_Connection={thusted_connection}{";" if args else ""}{";".join(*args)}', encoding=encoding)
+        return Connection(logger=logger, df_connection=pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection={thusted_connection}', encoding=encoding))
+    return Connection(logger=logger, df_connection=pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Trusted_Connection={thusted_connection}{";" if args else ""}{";".join(*args)}', encoding=encoding))
 
-def sqlalchemy_engine(con_type: str, username: str, password: str, driver: str, server: str, database: str, encoding: str = 'utf-16le', *args):
+def sqlalchemy_engine(con_type: str, username: str, password: str, driver: str, server: str, database: str, encoding: str = 'utf-16le', logger = None, *args):
     """
     Creates a SQLAlchemy engine for connecting to a database.
 
@@ -55,7 +59,7 @@ def sqlalchemy_engine(con_type: str, username: str, password: str, driver: str, 
         * *args: Additional arguments for the connection string.
 
     Returns:
-        * sqlalchemy.engine.Engine: The SQLAlchemy engine object.
+        * Connection object
 
     """
-    return sqlalchemy.create_engine(f'{con_type}://{username}:{password}@{server}/{database}?driver={driver};Trusted_Connection=yes{";" if args else ""}{";".join(*args)}', encoding=encoding)
+    return Connection(logger=logger, df_connection=sqlalchemy.create_engine(f'{con_type}://{username}:{password}@{server}/{database}?driver={driver};Trusted_Connection=yes{";" if args else ""}{";".join(*args)}', encoding=encoding))
