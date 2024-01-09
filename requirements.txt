@@ -1,4 +1,4 @@
-cx-Oracle == 8.3.0
+oracledb == 1.4.2
 numpy == 1.26.2
 pandas == 2.1.4
 pip == 23.2.1
