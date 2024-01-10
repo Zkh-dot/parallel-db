@@ -12,13 +12,15 @@ from ..decorators import utils as utils
 class BaseTable(AbstractTable):
     table = pd.DataFrame
     connection_name = str
+    connection = Connection
     requirements = []
     stages = []
     log_consol = True
     log_file = True
     draw_progress = True
+    __sql_path = os.path.dirname(os.path.abspath(__file__))
 
-    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True):
+    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True, auto_build = True, parallel = False):
         self.log_consol = log_consol
         self.log_file = log_file
         self.draw_progress = draw_progress
@@ -38,6 +40,12 @@ class BaseTable(AbstractTable):
         
         for i, table in enumerate(self.requirements):
             self.requirements[i] = con_factory.connect_table(table)
+            
+        if auto_build:
+            if parallel:
+                self.build_paral()
+            else:
+                self.build()
             
     def __init_subclass__(cls):
         cls.__set_sql_scripts_path()

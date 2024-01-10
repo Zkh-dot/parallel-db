@@ -10,7 +10,7 @@ from parallel_db.db_connection.connection_factory import connection_factory
 class test_table_down_1(BaseTable):
     connection_name = "sqlite"
     def __init__(self, __logger=None, db_connection=None, connection_factory=None, log_consol=True, log_file=True, draw_progress=True):
-        super().__init__(__logger, db_connection, connection_factory, log_consol, log_file, draw_progress)
+        super().__init__(__logger, db_connection, connection_factory, log_consol, log_file, draw_progress, auto_build=False)
         self.stages = [self.create_table, self.insert]
         
     def create_table(self):
@@ -28,7 +28,7 @@ class test_table_down_1(BaseTable):
 class test_table_down_2(BaseTable):
     connection_name = "sqlite"
     def __init__(self, __logger=None, db_connection=None, connection_factory=None, log_consol=True, log_file=True, draw_progress=True):
-        super().__init__(__logger, db_connection, connection_factory, log_consol, log_file, draw_progress)
+        super().__init__(__logger, db_connection, connection_factory, log_consol, log_file, draw_progress, auto_build=False)
         self.stages = [self.create_table, self.insert, self.select]
     def create_table(self):
         self.connection.exequte("CREATE TABLE test_2 (id int, name varchar(255))")
@@ -49,7 +49,7 @@ class test_table_up(BaseTable):
     requirements = [test_table_down_1, test_table_down_2]
     connection_name = "sqlite"
     def __init__(self, __logger=None, db_connection=None, connection_factory=None, log_consol=True, log_file=True, draw_progress=True):
-        super().__init__(__logger, db_connection, connection_factory, log_consol, log_file, draw_progress)
+        super().__init__(__logger, db_connection, connection_factory, log_consol, log_file, draw_progress, auto_build=False)
         self.stages = [self.create, self.insert, self.select, self.clean]
     def create(self):
         self.connection.exequte("CREATE TABLE test_up (id int, name varchar(255))")

@@ -285,7 +285,7 @@ class Connection:
                 self.__logger.error(e)
             return False
         
-    def exequte(self, sql_requests: str = None, command_name: str = None, really_try=True, go_next=True, commit=True, *args):
+    def exequte(self, sql_requests: str = None, command_name: str = None, really_try=True, go_next=True, commit=True, *args) -> pd.DataFrame:
         """
         Executes one or more SQL commands. The commands must be separated by semicolons.
 
