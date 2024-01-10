@@ -1,11 +1,11 @@
 from parallel_db.logger import get_logger, trace_call
-from unittest import TestCase
+import unittest
 from rich import progress
 
 def simple_func():
     return 1
 
-class TestLogger(TestCase):
+class TestLogger(unittest.TestCase):
     def test_init_handlers(self):
         logger = get_logger()
         print(logger.handlers)
@@ -29,3 +29,5 @@ class TestLogger(TestCase):
         res = trace_call(logger, simple_func)()
         self.assertEqual(res, 1)
         
+if __name__ == "__main__":
+    unittest.main()

@@ -1,8 +1,6 @@
 # _*_ coding: utf-8 _*_
 import oracledb
 import pyodbc
-import os
-import copy
 import logging
 import pandas as pd
 import sqlalchemy
@@ -13,6 +11,9 @@ from datetime import timedelta
 from ..time_predictor.time_predictor import TimePredictor
 from typing import Union
 from inspect import isclass
+
+import sqlalchemy.types as basic_types
+import sqlalchemy.dialects.oracle as oracle_types
 
 
 class Connection:
@@ -45,6 +46,7 @@ class Connection:
         else:
             self.__logger = get_logger(self.__class__.__name__, log_consol=False, log_file=False, draw_progress=False)
         
+        self.types = basic_types
         self.__connection = None
         self.__cursor = None
         self.predictor = TimePredictor(logger)
@@ -186,6 +188,8 @@ class Connection:
         else:
             self.__connect_instance(db_connection)
         self.__switch_state()
+        if isinstance(self.__connection, oracledb.Connection):
+            self.types = oracle_types
             
     @connection.deleter
     def connection(self):
