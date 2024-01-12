@@ -76,7 +76,7 @@ def trace_call(logger: logging.Logger, func):
         return result
     return wrapper
 
-def ignere_pandas_warnings():
+def ignore_pandas_warnings():
     import warnings
     warnings.filterwarnings("ignore", category=UserWarning, module='pandas')
     warnings.filterwarnings("ignore", category=FutureWarning, module='pandas')

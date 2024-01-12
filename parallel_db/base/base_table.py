@@ -20,7 +20,7 @@ class BaseTable(AbstractTable):
     draw_progress = True
     __sql_path = os.path.dirname(os.path.abspath(__file__))
 
-    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True, auto_build = True, parallel = False):
+    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True, auto_build = True, parallel = False, file = None):
         self.log_consol = log_consol
         self.log_file = log_file
         self.draw_progress = draw_progress
@@ -41,14 +41,14 @@ class BaseTable(AbstractTable):
         for i, table in enumerate(self.requirements):
             self.requirements[i] = con_factory.connect_table(table)
             
+        if file:
+            self.sql_path = file
+        
         if auto_build:
             if parallel:
                 self.build_paral()
             else:
                 self.build()
-            
-    def __init_subclass__(cls):
-        cls.__set_sql_scripts_path()
         
     def __create_logger(self):
         self.__logger = logger.get_logger(self.__class__.__name__, self.log_consol, self.log_file, self.draw_progress)
@@ -56,10 +56,18 @@ class BaseTable(AbstractTable):
         utils.decorate_function_by_name(decorator_with_logger, "read_sql", "pandas")
         utils.decorate_function_by_name(decorator_with_logger, "Cursor.execute", "pyodbc")
         utils.decorate_function_by_name(decorator_with_logger, "DataFrame.to_sql", "pandas")
+        
+    @property
+    def sql_path(self):
+        return self.__sql_path
     
-    @classmethod        
-    def __set_sql_scripts_path(cls):
-        cls.__sql_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), "sql_scripts")
+    @sql_path.setter
+    def sql_path(self, file):
+        self.__sql_path = os.path.join(os.path.dirname(os.path.abspath(file)), "sql_scripts")
+        
+    @property
+    def logger(self):
+        return self.__logger
 
     def command(self, script_name: str) -> str:
         with open(os.path.join(self.__sql_path, script_name), "r", encoding="utf-8") as sql_script:

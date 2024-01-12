@@ -23,7 +23,7 @@ class AbstractTable(ABC):
             * __logger (Logger, optional): The logger object. Defaults to None.
             * db_connection (connection, optional): The database connection object. Defaults to None.
             * connection_factory (connection_factory, optional): The connection factory object. Defaults to None.
-
+            * file (str, optional): The path to the child file. Easiest way to pass it is __file__. Defaults to None. 
         Raises:
             TypeError: If db_connection is not of type connection.
         """
@@ -95,5 +95,16 @@ class AbstractTable(ABC):
 
         Returns:
             None
+        """
+        pass
+    
+    @abstractmethod
+    @property
+    def sql_path(self):
+        """
+        Returns the path to the SQL scripts. To set it pass __file__ into it. 
+
+        Returns:
+            str: The path to the SQL scripts.
         """
         pass
