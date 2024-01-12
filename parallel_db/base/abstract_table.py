@@ -98,7 +98,6 @@ class AbstractTable(ABC):
         """
         pass
     
-    @abstractmethod
     @property
     def sql_path(self):
         """
