@@ -75,7 +75,7 @@ class TimePredictor:
             self.__logger = get_logger(self.__class__.__name__, log_consol=False, log_file=False, draw_progress=False)
         try:
             self.history = pd.read_csv(self.history_path)
-        except:
+        except FileNotFoundError:
             self.__logger.info('Не знающий своего прошлого, не имеет будущего!')
         if os.path.exists(self.model_path):
             with open(self.model_path, 'rb') as f:
@@ -139,7 +139,9 @@ class TimePredictor:
         try:
             self.history.to_csv(self.history_path)
         except ImportError:
-            self.__logger.warning("python did not wait 4me ¯\_(ツ)_/¯")
+            # cause of garbage collection this print is shown even if logger is disabled
+            # self.__logger.warning("python did not wait 4me ¯\_(ツ)_/¯")
+            pass
         except Exception as e:
             self.__logger.error(e)
             raise
@@ -151,5 +153,5 @@ class TimePredictor:
         Returns:
             None
         """
-        self.__logger.warning("Your tables are done, finishing kernel jobs")
+        # self.__logger.warning("Your tables are done, finishing kernel jobs")
         self.save()

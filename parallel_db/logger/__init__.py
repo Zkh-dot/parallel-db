@@ -5,6 +5,7 @@ from typing import Optional
 from functools import wraps
 import datetime
 from rich.progress import Progress
+import pandas as pd
 
 
 __all__ = ["get_logger"]
@@ -29,8 +30,6 @@ def get_logger(logger_name: Optional[str] = None, log_consol = True, log_file = 
         handlers.append(logging.StreamHandler())
     if log_file:
         logging.FileHandler(os.path.join(filename), mode="w", encoding='utf-8')
-        
-    print(handlers)
         
     logging.basicConfig(format=u'[{asctime} - {levelname}]: {message}\n',
                     style='{', level=logging.INFO,
@@ -76,3 +75,8 @@ def trace_call(logger: logging.Logger, func):
             name, datetime.datetime.now()))
         return result
     return wrapper
+
+def ignere_pandas_warnings():
+    import warnings
+    warnings.filterwarnings("ignore", category=UserWarning, module='pandas')
+    warnings.filterwarnings("ignore", category=FutureWarning, module='pandas')

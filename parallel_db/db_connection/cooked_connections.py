@@ -1,12 +1,12 @@
 from .default_connections import *
-from connection import Connection
+from .connection import Connection
 
 import pyodbc
 import oracledb
 import sqlalchemy
 
 
-def oracle_connection(username: str, password: str, con_line: str, encoding: str = 'UTF-8', logger = None):
+def precooked_oracle_connection(username: str, password: str, con_line: str, encoding: str = 'UTF-8', logger = None):
     """
     Establishes a connection to an Oracle database.
 
@@ -22,7 +22,7 @@ def oracle_connection(username: str, password: str, con_line: str, encoding: str
     """
     return Connection(logger=logger, df_connection=oracledb.connect(username, password, f'{con_line}', encoding=encoding))
 
-def mssql_connection(username: str = None, password: str = None, driver: str = 'SQL Server', server: str = '', database: str = "", thusted_connection: str = "yes", encoding: str = 'utf-16le', logger = None, *args):
+def precooked_mssql_connection(username: str = None, password: str = None, driver: str = 'SQL Server', server: str = '', database: str = "", thusted_connection: str = "yes", encoding: str = 'utf-16le', logger = None, *args):
     """
     Establishes a connection to a Microsoft SQL Server database.
 
@@ -44,7 +44,7 @@ def mssql_connection(username: str = None, password: str = None, driver: str = '
         return Connection(logger=logger, df_connection=pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection={thusted_connection}', encoding=encoding))
     return Connection(logger=logger, df_connection=pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Trusted_Connection={thusted_connection}{";" if args else ""}{";".join(*args)}', encoding=encoding))
 
-def sqlalchemy_engine(con_type: str, username: str, password: str, driver: str, server: str, database: str, encoding: str = 'utf-16le', logger = None, *args):
+def precooked_sqlalchemy_engine(con_type: str, username: str, password: str, driver: str, server: str, database: str, encoding: str = 'utf-16le', logger = None, *args):
     """
     Creates a SQLAlchemy engine for connecting to a database.
 

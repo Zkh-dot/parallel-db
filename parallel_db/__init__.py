@@ -1,5 +1,6 @@
 from .base import BaseTable
 from .db_connection.default_connections import * 
+from .db_connection.cooked_connections import *
 from .db_connection.connection_factory import connection_factory
 from .base.base_scenario import base_scenario
 from .db_connection.connection import Connection
