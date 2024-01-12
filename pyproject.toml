@@ -16,7 +16,7 @@ include = [
 
 [project]
 name = "parallel_db"
-version = "0.0.2"
+version = "0.0.3a1"
 authors = [
   { name="zkh-dot", email="kernzahar@gmail.com" },
 ]

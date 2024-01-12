@@ -20,7 +20,7 @@ class BaseTable(AbstractTable):
     draw_progress = True
     __sql_path = os.path.dirname(os.path.abspath(__file__))
 
-    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True, auto_build = True, parallel = False, file = None):
+    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True, auto_build = False, parallel = False, file = None):
         self.log_consol = log_consol
         self.log_file = log_file
         self.draw_progress = draw_progress

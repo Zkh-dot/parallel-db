@@ -20,7 +20,7 @@ def precooked_oracle_connection(username: str, password: str, con_line: str, enc
         * Connection object
 
     """
-    return Connection(logger=logger, df_connection=oracledb.connect(username, password, f'{con_line}', encoding=encoding))
+    return Connection(logger=logger, df_connection=oracledb.connect(username, password, f'{con_line}'))
 
 def precooked_mssql_connection(username: str = None, password: str = None, driver: str = 'SQL Server', server: str = '', database: str = "", thusted_connection: str = "yes", encoding: str = 'utf-16le', logger = None, *args):
     """
@@ -40,11 +40,13 @@ def precooked_mssql_connection(username: str = None, password: str = None, drive
         * Connection object
 
     """
+    if args:
+        args = ";".join(*args)
     if username is None and password is None:
         return Connection(logger=logger, df_connection=pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection={thusted_connection}', encoding=encoding))
-    return Connection(logger=logger, df_connection=pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Trusted_Connection={thusted_connection}{";" if args else ""}{";".join(*args)}', encoding=encoding))
+    return Connection(logger=logger, df_connection=pyodbc.connect(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password};Trusted_Connection={thusted_connection}{f";{args}" if args else ""}', encoding=encoding))
 
-def precooked_sqlalchemy_engine(con_type: str, username: str, password: str, driver: str, server: str, database: str, encoding: str = 'utf-16le', logger = None, *args):
+def precooked_sqlalchemy_engine(con_type: str = None, username: str = None, password: str = None, driver: str = None, server: str = None, database: str = None, encoding: str = 'utf-16le', logger = None, line = None, *args):
     """
     Creates a SQLAlchemy engine for connecting to a database.
 
@@ -62,4 +64,6 @@ def precooked_sqlalchemy_engine(con_type: str, username: str, password: str, dri
         * Connection object
 
     """
+    if line:
+        return Connection(logger=logger, df_connection=sqlalchemy.create_engine(line))
     return Connection(logger=logger, df_connection=sqlalchemy.create_engine(f'{con_type}://{username}:{password}@{server}/{database}?driver={driver};Trusted_Connection=yes{";" if args else ""}{";".join(*args)}', encoding=encoding))
