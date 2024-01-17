@@ -20,18 +20,17 @@ class connection_factory:
     def connect_table(self,  table) -> AbstractTable:
         if not table.connection_name:
             self.__logger.error(
-                "Not declared connection in table {}!".format(table.__name__))
+                "Not declared connection in table {}!".format(table.__class__.__name__))
             raise KeyError
         try:
-            self.__logger.info("Connecting table {}...".format(table.__name__))
             table = table(self.__logger, self.connections[table.connection_name.lower()], self)
         except KeyError:
             if Connection == None:
                 self.__logger.error(
-                    "No connection in table {}!".format(table.__name__))
+                    "No connection in table {}!".format(table.__class__.__name__))
             else:
                 self.__logger.error(
-                    "Not supported connection in table {}: {}!".format(table.__name__, table.connection_name))
+                    "Not supported connection in table {}: {}!".format(table.__class__.__name__, table.connection_name))
                 raise KeyError
         except Exception as e:
             self.__logger.error("something went wrong")
