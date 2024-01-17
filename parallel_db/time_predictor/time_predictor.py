@@ -74,7 +74,7 @@ class TimePredictor:
         else:
             self.__logger = get_logger(self.__class__.__name__, log_consol=False, log_file=False, draw_progress=False)
         try:
-            self.history = pd.read_csv(self.history_path)
+            self.history = pd.read_csv(self.history_path).dropna(axis='columns')
         except FileNotFoundError:
             self.__logger.info('Не знающий своего прошлого, не имеет будущего!')
         if os.path.exists(self.model_path):
@@ -137,6 +137,7 @@ class TimePredictor:
             None
         """
         try:
+            self.history = self.history.loc[:, ~self.history.columns.str.contains('^Unnamed')]
             self.history.to_csv(self.history_path)
         except ImportError:
             # cause of garbage collection this print is shown even if logger is disabled

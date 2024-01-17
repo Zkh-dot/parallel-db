@@ -43,7 +43,7 @@ class BaseTable(AbstractTable):
             if self.connection_name == str:
                 self.__logger.warning("con_factory is not connection_factory")
             else:
-                raise TypeError("con_factory is not connection_factory")
+                raise TypeError("con_factory is not connection_factory!\nT'ip: You should either pass factory, or don't pass connection_name!")
         else:
             for i, table in enumerate(self.requirements):
                 self.requirements[i] = con_factory.connect_table(table)

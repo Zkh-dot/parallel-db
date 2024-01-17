@@ -72,9 +72,9 @@ class test_error_table(BaseTable):
     connection_name = "sqlite_error"
     
 class empty_table(BaseTable):
-    def __init__(self, __logger: Logger = None, /, db_connection: Connection = None, con_factory: connection_factory = None, log_consol=True, log_file=True, draw_progress=True, auto_build=False, parallel=False, file=None):
-        super().__init__(__logger, db_connection, con_factory, log_consol, log_file, draw_progress, auto_build, parallel, file)    
-    
+    def empty(self):
+        print("just chilling, bro")    
+
 class empty_table_with_connection(BaseTable):
     connection_name = "name"
     
