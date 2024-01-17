@@ -7,7 +7,7 @@ class AbstractTable(ABC):
     """
     Base tables class. Is used to create tables in a database.
     """
-    table = pd.DataFrame
+    __table = pd.DataFrame
     connection_name = str
     requirements = []
     stages = []
@@ -43,14 +43,14 @@ class AbstractTable(ABC):
         pass
 
     @abstractmethod
-    def build(self, custom_stages = [], custom_requirements = []):
+    def build(self, custom_stages = [], custom_requirements = [], full = True):
         """
         Builds the BaseTable by building its requirements and executing its stages.
         
             Args:
                 * custom_stages (list, optional): A list of custom stages to be executed. Defaults to an empty list.
                 * custom_requirements (list, optional): A list of custom requirements to be built. Defaults to an empty list.
-        
+                * full (bool, optional): If falce, requirements will not be build.
         Returns:
             None
         """
@@ -64,7 +64,6 @@ class AbstractTable(ABC):
             Args:
                 * custom_stages (list, optional): A list of custom stages to be executed. Defaults to an empty list.
                 * custom_requirements (list, optional): A list of custom requirements to be built. Defaults to an empty list.
-
             Returns:
                 None
             """
@@ -106,4 +105,14 @@ class AbstractTable(ABC):
         Returns:
             str: The path to the SQL scripts.
         """
+        pass
+    
+    @property
+    @abstractmethod
+    def table(self) -> pd.DataFrame:
+        pass
+    
+    @table.setter
+    @abstractmethod
+    def table(self, table):
         pass

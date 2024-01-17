@@ -8,9 +8,13 @@ from .. import logger
 from ..db_connection.connection_factory import connection_factory
 from logging import Logger
 from ..decorators import utils as utils
+
+class classproperty(property):
+    def __get__(self, owner_self, owner_cls):
+        return self.fget(owner_cls)
     
 class BaseTable(AbstractTable):
-    table = pd.DataFrame
+    __table = pd.DataFrame
     connection_name = str
     connection = Connection
     requirements = []
@@ -73,13 +77,14 @@ class BaseTable(AbstractTable):
         with open(os.path.join(self.__sql_path, script_name), "r", encoding="utf-8") as sql_script:
             return sql_script.read()
 
-    def build(self, custom_stages = [], custom_requirements = []):
+    def build(self, custom_stages = [], custom_requirements = [], full = True):
         if custom_requirements == []:
             custom_requirements = self.requirements
         if custom_stages == []:
             custom_stages = self.stages
-        for r in custom_requirements:
-            r.build()
+        if full:
+            for r in custom_requirements:
+                r.build()
 
         for stage in custom_stages:
             stage()
@@ -111,8 +116,16 @@ class BaseTable(AbstractTable):
                 
     @classmethod
     def set_reqs(cls, reqs: list):
-        cls.requirements = reqs             
+        cls.requirements = reqs     
           
     @classmethod
     def _put(cls, table):
-        cls.table = table
+        cls.__table = table
+        
+    @classproperty
+    def table(cls) -> pd.DataFrame:
+        return cls.__table
+    
+    @table.setter
+    def table(self, table):
+        self._put(table)

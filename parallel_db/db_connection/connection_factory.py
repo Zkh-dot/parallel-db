@@ -23,6 +23,7 @@ class connection_factory:
                 "Not declared connection in table {}!".format(table.__name__))
             raise KeyError
         try:
+            self.__logger.info("Connecting table {}...".format(table.__name__))
             table = table(self.__logger, self.connections[table.connection_name.lower()], self)
         except KeyError:
             if Connection == None:

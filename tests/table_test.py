@@ -1,6 +1,7 @@
 import unittest
 import sqlite3
 import os 
+import pandas as pd
 from time import sleep
 
 from parallel_db.base import BaseTable
@@ -39,7 +40,7 @@ class test_table_down_2(BaseTable):
         print("insert_2")
     
     def select(self):
-        self._put(self.connection.exequte("SELECT * FROM test_2")) 
+        self.table = self.connection.exequte("SELECT * FROM test_2")
     
     def clean(self):
         self.connection.exequte("DROP TABLE test_2")
@@ -69,6 +70,9 @@ class test_table_up(BaseTable):
 class test_error_table(BaseTable):
     connection_name = "sqlite_error"
     
+class empty_table(BaseTable):
+    connection_name = "name"
+    
     
 class TestConnectFactory(unittest.TestCase):
         
@@ -77,6 +81,13 @@ class TestConnectFactory(unittest.TestCase):
         self.assertIsInstance(factory.connections["sqlite"], Connection)
         self.assertIsInstance(factory.connections["sqlite"].connection, sqlite3.Connection)
         self.assertIsInstance(factory, connection_factory)
+        
+    def test_put(self):
+        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        factory = connection_factory({"name": 2})
+        table = factory.connect_table(empty_table)
+        table.table = pd.DataFrame({"id": [1, 2], "name": ["test", "test2"]})
+        self.assertEqual(table.table.iloc[0, 0], 1)
 
     def test_init_tables(self):
         con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
