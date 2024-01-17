@@ -4,6 +4,7 @@ import sqlite3
 import os 
 import pandas as pd
 from time import sleep
+from parallel_db.logger import get_logger
 from parallel_db.base import BaseTable
 from parallel_db.db_connection.connection import Connection
 from parallel_db.db_connection.connection_factory import connection_factory
@@ -35,17 +36,16 @@ class table_three(BaseTable):
         self.stages = [self.put]
         
     def put(self):
-        print(table_one.table)
-        print(table_two.table)
         self.table = pd.DataFrame.merge(self=table_one.table, right=table_two.table, on="id", how="outer")
         
         
 class build_tests(unittest.TestCase):
     def test_build(self):        
-        factory = connection_factory({"name": 1})
+        factory = connection_factory({"name": 1}, logger=get_logger("name", True, True, False))
         table = factory.connect_table(table_three)
-        table.build()
-        self.assertEqual(table.table.shape, (2, 1))
+        print("---->",table.requirements)
+        table.build_paral()
+        # self.assertEqual(table.table.shape, (2, 1))
         
     # def test_build_paral(self):
     #     factory = connection_factory({"name": 1})

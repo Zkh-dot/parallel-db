@@ -95,12 +95,14 @@ class BaseTable(AbstractTable):
             custom_requirements = self.requirements
         if custom_stages == []:
             custom_stages = self.stages 
+        self.__logger.debug(f"{self.__class__.__name__} requirements: {custom_requirements}")
+        self.__logger.debug(f"{self.__class__.__name__} stages: {custom_stages}")
             
         if self.__logger.progress:
             self.task = self.__logger.progress.add_task(self.__class__.__name__, total=len(custom_stages) * 2)
         threads = []
         for i, r in enumerate(custom_requirements):
-            x = threading.Thread(target=r.build_paral, args=(self.__logger.progress,))
+            x = threading.Thread(target=r.build_paral, args=())
             threads.append(x)
             self.__logger.info(f"Start thread for {r.__class__.__name__} ( ˶ˆ꒳ˆ˵ )")
             x.start()
