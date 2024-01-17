@@ -4,7 +4,6 @@ import sqlite3
 import os 
 import pandas as pd
 from time import sleep
-
 from parallel_db.base import BaseTable
 from parallel_db.db_connection.connection import Connection
 from parallel_db.db_connection.connection_factory import connection_factory
@@ -46,6 +45,12 @@ class build_tests(unittest.TestCase):
         factory = connection_factory({"name": 1})
         table = factory.connect_table(table_three)
         table.build()
+        self.assertEqual(table.table.shape, (2, 1))
+        
+    def test_build_paral(self):
+        factory = connection_factory({"name": 1})
+        table = factory.connect_table(table_three)
+        table.build_paral()
         self.assertEqual(table.table.shape, (2, 1))
         
 if __name__ == "__main__":
