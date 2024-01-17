@@ -40,10 +40,13 @@ class BaseTable(AbstractTable):
             self.__logger.warning("db_connection is not connection!")
         
         if not isinstance(con_factory, connection_factory):
-            raise TypeError("con_factory is not connection_factory")
-        
-        for i, table in enumerate(self.requirements):
-            self.requirements[i] = con_factory.connect_table(table)
+            if self.connection_name == str:
+                self.__logger.warning("con_factory is not connection_factory")
+            else:
+                raise TypeError("con_factory is not connection_factory")
+        else:
+            for i, table in enumerate(self.requirements):
+                self.requirements[i] = con_factory.connect_table(table)
             
         if file:
             self.sql_path = file

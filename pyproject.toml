@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     "hatchling",
-    "cx-Oracle == 8.3.0",
     "oracledb == 1.4.2",
     "pandas", 
     "rich == 13.7.0",
@@ -16,7 +15,7 @@ include = [
 
 [project]
 name = "parallel_db"
-version = "0.0.3a1"
+version = "0.0.3-2"
 authors = [
   { name="zkh-dot", email="kernzahar@gmail.com" },
 ]
