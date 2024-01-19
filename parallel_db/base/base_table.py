@@ -121,7 +121,11 @@ class BaseTable(AbstractTable):
                 
     @classmethod
     def set_reqs(cls, reqs: list):
-        cls.requirements = reqs     
+        cls.requirements = reqs 
+        
+    def set_stages(self, stages=...):
+            if stages != []:
+                self.stages = stages
           
     @classmethod
     def _put(cls, table):

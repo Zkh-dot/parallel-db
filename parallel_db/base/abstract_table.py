@@ -41,6 +41,10 @@ class AbstractTable(ABC):
             str: The content of the SQL script.
         """
         pass
+    
+    @abstractmethod
+    def set_stages(self, stages = []):
+        pass
 
     @abstractmethod
     def build(self, custom_stages = [], custom_requirements = [], full = True):

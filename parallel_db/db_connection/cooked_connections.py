@@ -20,7 +20,7 @@ def precooked_oracle_connection(username: str, password: str, con_line: str, enc
         * Connection object
 
     """
-    return Connection(logger=logger, df_connection=oracledb.connect(username, password, f'{con_line}'))
+    return Connection(logger=logger, df_connection=oracledb.connect(username=username, password=password, dsn=f'{con_line}'))
 
 def precooked_mssql_connection(username: str = None, password: str = None, driver: str = 'SQL Server', server: str = '', database: str = "", thusted_connection: str = "yes", encoding: str = 'utf-16le', logger = None, *args):
     """
