@@ -11,21 +11,13 @@ from datetime import timedelta
 from ..time_predictor.time_predictor import TimePredictor
 from typing import Union
 from inspect import isclass
+import warnings
 
 import sqlalchemy.types as basic_types
 import sqlalchemy.dialects.oracle as oracle_types
 
 
 class Connection:
-    """
-    A class representing a database connection.
-
-    Args:
-        * logger (logging.Logger, optional): The logger object for logging messages.
-        * df_connection (Union(pyodbc.Connection, oracledb.Connection), optional): The database connection object.
-        * login (str, optional): The login username.
-        * password (str, optional): The login password.
-    """
     predictor = TimePredictor
     connected = False
 
@@ -48,6 +40,7 @@ class Connection:
         
         self.types = basic_types
         self.__connection = None
+        self.__engine = sqlalchemy.Engine
         self.__cursor = None
         self.predictor = TimePredictor(logger)
         self.connection = df_connection
@@ -185,11 +178,33 @@ class Connection:
             self.__connect_engine(db_connection)
         elif isclass(db_connection):
             self.__connect_class(db_connection)
+            
+            warnings.warn("Class-based connection is deprecated. Please use sqlalchemy.Engine connection instead. \nprecooked_sqlalchemy_engine is here to help!", DeprecationWarning)
         else:
             self.__connect_instance(db_connection)
+            warnings.warn("Instance-based connection is deprecated. Please use sqlalchemy.Engine connection instead. \nprecooked_sqlalchemy_engine is here to help!", DeprecationWarning)
         self.__switch_state()
         if isinstance(self.__connection, oracledb.Connection):
             self.types = oracle_types
+            
+    @property
+    def engine(self):
+        """
+        sqlalchemy.Engine: The SQLAlchemy engine object.
+        """
+        return self.__engine 
+    
+    @engine.setter
+    def engine(self, prefix: str = None):
+        """
+        Sets the SQLAlchemy engine object.
+
+        Args:
+            * line (str): The connection string.
+        """
+        # sqlalchemy.URL(prefix, self.__login, self.__password)
+        # self.__engine = sqlalchemy.create_engine(prefix + self.__login + ":" + self.__password + "@" + self.__connection)
+        self.connection = self.__engine
             
     @connection.deleter
     def connection(self):

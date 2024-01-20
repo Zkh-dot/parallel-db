@@ -8,6 +8,7 @@ from .. import logger
 from ..db_connection.connection_factory import connection_factory
 from logging import Logger
 from ..decorators import utils as utils
+import importlib.util
 
 class classproperty(property):
     def __get__(self, owner_self, owner_cls):
