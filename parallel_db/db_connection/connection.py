@@ -12,6 +12,7 @@ from ..time_predictor.time_predictor import TimePredictor
 from typing import Union
 from inspect import isclass
 import warnings
+from .vanna_support import Helper
 
 import sqlalchemy.types as basic_types
 import sqlalchemy.dialects.oracle as oracle_types
@@ -21,7 +22,7 @@ class Connection:
     predictor = TimePredictor
     connected = False
 
-    def __init__(self, logger: logging.Logger = None, df_connection: Union[pyodbc.Connection, oracledb.Connection] = None, login: str = None, password: str = None) -> None:
+    def __init__(self, logger: logging.Logger = None, df_connection: Union[pyodbc.Connection, oracledb.Connection] = None, login: str = None, password: str = None, email: str = None) -> None:
         """
         Initializes a connection object.
 
@@ -30,6 +31,7 @@ class Connection:
             * df_connection (Union(pyodbc.Connection, oracledb.Connection), optional): The database connection object.
             * login (str, optional): The login username.
             * password (str, optional): The login password.
+            * email (str, optional): Your email for ai helper.
         """
         self.__login = login
         self.__password = password
@@ -44,6 +46,7 @@ class Connection:
         self.__cursor = None
         self.predictor = TimePredictor(logger)
         self.connection = df_connection
+        self.helper = Helper(email=email)
         
     def __switch_state(self):
         self.connected = not self.connected
