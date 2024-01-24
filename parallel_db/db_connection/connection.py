@@ -318,7 +318,7 @@ class Connection:
             pd.DataFrame: The combined result of the queries as a pandas DataFrame. If no SELECT statement is present in the SQL commands, an empty DataFrame is returned.
         """
         self.__logger.debug(sql_requests)
-        sql_requests = sql_requests.split(";")
+        sql_requests = [s for s in sql_requests.split(";") if s.strip() != '']
         result = pd.DataFrame()
         
         self.__logger.info("executing {} sql command(s):".format(len(sql_requests) - sql_requests.count("")))

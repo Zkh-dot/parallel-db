@@ -70,7 +70,7 @@ class TestConnection(unittest.TestCase):
                          INSERT INTO test VALUES (1, 'test');
                          INSERT INTO test VALUES (2, 'test2');
                          INSERT INTO test VALUES (3, 'test3');
-                         SELECT * FROM test
+                         SELECT * FROM test;
                         """)
         self.assertIsInstance(df, pd.DataFrame)
         con.exequte("DROP TABLE test")
