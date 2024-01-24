@@ -9,8 +9,8 @@ class connection_factory:
     """
     def __init__(self, connections: dict[str, Connection], logger: Logger = None):
         self.connections = connections
-        if logger:
-            print(logger.handlers)
+        if isinstance(logger, Logger):
+            self.__logger = logger
         else:
             self.__logger = get_logger(self.__class__.__name__, False, False, False)
             
