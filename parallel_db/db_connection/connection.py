@@ -368,6 +368,10 @@ class Connection:
 
         return table, mapping
     
+    @property
+    def logger(self):
+        return self.__logger
+    
     def __disconnect(self):
         """
         Disconnects from .the database.

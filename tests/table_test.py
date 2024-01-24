@@ -8,6 +8,7 @@ from time import sleep
 from parallel_db.base import BaseTable
 from parallel_db.db_connection.connection import Connection
 from parallel_db.db_connection.connection_factory import connection_factory
+from parallel_db.logger import get_logger
 
 class test_table_down_1(BaseTable):
     connection_name = "sqlite"
@@ -81,7 +82,7 @@ class empty_table_with_connection(BaseTable):
 class TestConnectFactory(unittest.TestCase):
         
     def test_init(self):
-        factory = connection_factory({"sqlite": Connection(logger=None, df_connection=sqlite3.connect("test.db"))})
+        factory = connection_factory({"sqlite": Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test.db"))})
         self.assertIsInstance(factory.connections["sqlite"], Connection)
         self.assertIsInstance(factory.connections["sqlite"].connection, sqlite3.Connection)
         self.assertIsInstance(factory, connection_factory)
@@ -96,31 +97,33 @@ class TestConnectFactory(unittest.TestCase):
         
     def test_put(self):
         con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
-        factory = connection_factory({"name": 2})
+        factory = connection_factory({"name": 2}, logger=None)
+        print("getting logger")
         table = factory.connect_table(empty_table_with_connection)
         table.table = pd.DataFrame({"id": [1, 2], "name": ["test", "test2"]})
+        table.logger.info("some log")
         self.assertEqual(table.table.iloc[0, 0], 1)
 
     def test_init_tables(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        con = Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test.db"))
         factory = connection_factory({"sqlite": con})
         table = factory.connect_table(test_table_down_1)
         self.assertIsInstance(table.connection, Connection)
 
     def test_init_tables_recursive(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        con = Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test.db"))
         factory = connection_factory({"sqlite": con})
         table = factory.connect_table(test_table_up)
         self.assertIsInstance(table.requirements[0], BaseTable)
  
     def test_error_connection_1(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        con = Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test.db"))
         factory = connection_factory({})
         with self.assertRaises(KeyError):
             factory.connect_table(test_table_down_1)
         
     def test_error_connection_2(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+        con = Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test.db"))
         factory = connection_factory({"sqlite": con})
         # with self.assertRaises(KeyError):
         factory.connect_table(test_table_down_1)
@@ -130,18 +133,17 @@ class TestConnectFactory(unittest.TestCase):
 
 class TestTable(unittest.TestCase): 
     # def test_sql_path(self):
-    #     con = connection(logger=None, df_connection=sqlite3.connect("test.db"))
+    #     con = connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test.db"))
     #     factory = connection_factory({"sqlite": con})
     #     table = factory.connect_table(test_table_down_1)
     #     self.assertEqual(table.command("insert_4.sql"), "INSERT INTO test VALUES (4, 'test4')")
      
     def test_one_table_exec(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test_1.db"))
+        con = Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test_1.db"))
         factory = connection_factory({"sqlite": con})
         table = factory.connect_table(test_table_down_1)
         table.build()
         df = con.exequte("SELECT * FROM test_1")
-        print("------>", df)
         self.assertEqual(df.iloc[0, 0], 1)
         self.assertEqual(df.iloc[0, 1], "test_1")
         self.assertEqual(df.iloc[1, 0], 2)
@@ -150,12 +152,11 @@ class TestTable(unittest.TestCase):
         con.close()
         
     def test_paral_one_table_exec(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test_2.db"))
+        con = Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test_2.db"))
         factory = connection_factory({"sqlite": con})
         table = factory.connect_table(test_table_down_1)
         table.build_paral()
         df = con.exequte("SELECT * FROM test_1")
-        print("------>", df)
         self.assertEqual(df.iloc[0, 0], 1)
         self.assertEqual(df.iloc[0, 1], "test_1")
         self.assertEqual(df.iloc[1, 0], 2)
@@ -165,13 +166,12 @@ class TestTable(unittest.TestCase):
         del table
         
     def test_all_exec(self):
-        con = Connection(logger=None, df_connection=sqlite3.connect("test_up.db"))
+        con = Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test_up.db"))
         factory = connection_factory({"sqlite": con})
         test_table_up.set_reqs([test_table_down_1, test_table_down_2])
         loc_table = factory.connect_table(test_table_up)
         loc_table.build()
         df = loc_table.table
-        print("------>", df)
         self.assertEqual(df.iloc[0, 0], 1)
         self.assertEqual(df.iloc[0, 1], "test_1")
         self.assertEqual(df.iloc[1, 0], 2)
@@ -184,7 +184,7 @@ class TestTable(unittest.TestCase):
         
     # sqlite dont like multythreading, so this test is not working :(
     # def test_all_paral_exec(self):
-    #     con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))
+    #     con = Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test.db"))
     #     factory = connection_factory({"sqlite": con})
     #     table = factory.connect_table(test_table_up)
     #     table.build_paral()

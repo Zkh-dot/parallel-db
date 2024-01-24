@@ -43,7 +43,6 @@ class base_scenario(ABC):
     
     @property
     def connections(self) -> dict[str, Connection]:
-        print('----->', type(self.__con_factory))
         return self.__con_factory.connections
     
     @connections.setter

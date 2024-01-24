@@ -7,14 +7,10 @@ import datetime
 from rich.progress import Progress
 import pandas as pd
 
-
 __all__ = ["get_logger"]
 
 os.makedirs("logs", exist_ok=True)
 filename = f"logs\\logs_{datetime.datetime.now().strftime('%y-%m-%d_%H-%M')}.log"
-
-
-
 
 class LoggingLevel(IntEnum):
     NOTSET = logging.NOTSET
@@ -29,19 +25,19 @@ def get_logger(logger_name: Optional[str] = None, log_consol = True, log_file = 
     if log_consol:
         handlers.append(logging.StreamHandler())
     if log_file:
-        logging.FileHandler(os.path.join(filename), mode="w", encoding='utf-8')
+        handlers.append(logging.FileHandler(os.path.join(filename), mode="w", encoding='utf-8'))
         
     logging.basicConfig(format=u'[{asctime} - {levelname}]: {message}\n',
                     style='{', level=logging.INFO,
                     handlers=handlers,
                     encoding = 'utf-8')
     logger = logging.getLogger(logger_name)
-    
+
     if draw_progress:
         logger.progress = Progress()
     else: 
         logger.progress = None
-        
+                
     # if not logger.hasHandlers(): #
     #     formatter = logging.Formatter(fmt='[{asctime}] {message}\n', style='{')
 

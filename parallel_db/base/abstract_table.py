@@ -120,3 +120,8 @@ class AbstractTable(ABC):
     @abstractmethod
     def table(self, table):
         pass
+    
+    @property
+    @abstractmethod
+    def logger(self) -> Logger:
+        pass

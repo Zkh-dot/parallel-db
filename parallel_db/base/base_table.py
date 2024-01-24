@@ -136,6 +136,10 @@ class BaseTable(AbstractTable):
     def table(cls) -> pd.DataFrame:
         return cls.__table
     
+    @property
+    def logger(self):
+        return self.__logger
+    
     @table.setter
     def table(self, table):
         self._put(table)
