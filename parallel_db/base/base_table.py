@@ -8,7 +8,8 @@ from .. import logger
 from ..db_connection.connection_factory import connection_factory
 from logging import Logger
 from ..decorators import utils as utils
-import importlib.util
+import inspect
+import warnings
 
 class classproperty(property):
     def __get__(self, owner_self, owner_cls):
@@ -23,9 +24,9 @@ class BaseTable(AbstractTable):
     log_consol = True
     log_file = True
     draw_progress = True
-    __sql_path = os.path.dirname(os.path.abspath(__file__))
+    __sql_path = ""
 
-    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True, auto_build = False, parallel = False, file = None):
+    def __init__(self, __logger: Logger = None, db_connection: Connection = None, con_factory: connection_factory = None, log_consol = True, log_file = True, draw_progress = True, auto_build = False, parallel = False, file = __file__):
         self.log_consol = log_consol
         self.log_file = log_file
         self.draw_progress = draw_progress
@@ -48,8 +49,8 @@ class BaseTable(AbstractTable):
         else:
             for i, table in enumerate(self.requirements):
                 self.requirements[i] = con_factory.connect_table(table)
-            
-        if file:
+        print(2, file, __file__, file != __file__)
+        if file != __file__:
             self.sql_path = file
         
         if auto_build:
@@ -70,8 +71,13 @@ class BaseTable(AbstractTable):
         return self.__sql_path
     
     @sql_path.setter
-    def sql_path(self, file):
-        self.__sql_path = os.path.join(os.path.dirname(os.path.abspath(file)), "sql_scripts")
+    def sql_path(self, path: str):
+        if path.endswith('.py'):
+            path = os.path.join(os.path.dirname(path), "sql_scripts")
+        if os.path.exists(path):
+            self.__sql_path = path
+        else:
+            warnings.warn(f"Path {path} to sql scripts not found!")
         
     @property
     def logger(self):

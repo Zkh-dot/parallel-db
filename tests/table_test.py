@@ -74,7 +74,11 @@ class test_error_table(BaseTable):
     
 class empty_table(BaseTable):
     def empty(self):
-        print("just chilling, bro")    
+        print("just chilling, bro") 
+        
+class path_table(BaseTable):
+    def __init__(self, __logger: Logger = None, /, db_connection: Connection = None, con_factory: connection_factory = None, log_consol=True, log_file=True, draw_progress=True, auto_build=False, parallel=False):
+        super().__init__(__logger, db_connection, con_factory, log_consol, log_file, draw_progress, auto_build, parallel, file=__file__)   
 
 class empty_table_with_connection(BaseTable):
     connection_name = "name"
@@ -85,15 +89,19 @@ class TestConnectFactory(unittest.TestCase):
         factory = connection_factory({"sqlite": Connection(logger=get_logger("log", False, True, False), df_connection=sqlite3.connect("test.db"))})
         self.assertIsInstance(factory.connections["sqlite"], Connection)
         self.assertIsInstance(factory.connections["sqlite"].connection, sqlite3.Connection)
-        self.assertIsInstance(factory, connection_factory)
-        
+        self.assertIsInstance(factory, connection_factory)    
+    
     def test_init_no_factory(self):
         table = empty_table()
         self.assertEqual(table.connection, Connection)
         
+    def test_sql_connection(self):
+        table = path_table()
+        self.assertEqual(table.sql_path, os.path.join(os.path.dirname(__file__), "sql_scripts"))
+        
     def test_init_no_factory_error(self):
         with self.assertRaises(TypeError):
-            table = empty_table_with_connection()
+            empty_table_with_connection()
         
     def test_put(self):
         con = Connection(logger=None, df_connection=sqlite3.connect("test.db"))

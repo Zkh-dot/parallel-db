@@ -11,8 +11,8 @@ from parallel_db.db_connection.connection_factory import connection_factory
 
 class table_one(BaseTable):
     connection_name = "name"
-    def __init__(self, __logger: Logger = None, /, db_connection: Connection = None, con_factory: connection_factory = None, log_consol=True, log_file=True, draw_progress=True, auto_build=False, parallel=False, file=None):
-        super().__init__(__logger, db_connection, con_factory, log_consol, log_file, draw_progress, auto_build, parallel, file)
+    def __init__(self, __logger: Logger = None, /, db_connection: Connection = None, con_factory: connection_factory = None, log_consol=True, log_file=True, draw_progress=True, auto_build=False, parallel=False):
+        super().__init__(__logger, db_connection, con_factory, log_consol, log_file, draw_progress, auto_build, parallel)
         self.stages = [self.put]
         
     def put(self):
@@ -21,7 +21,7 @@ class table_one(BaseTable):
 class table_two(BaseTable):
     connection_name = "name"
     def __init__(self, __logger: Logger = None, /, db_connection: Connection = None, con_factory: connection_factory = None, log_consol=True, log_file=True, draw_progress=True, auto_build=False, parallel=False, file=None):
-        super().__init__(__logger, db_connection, con_factory, log_consol, log_file, draw_progress, auto_build, parallel, file)
+        super().__init__(__logger, db_connection, con_factory, log_consol, log_file, draw_progress, auto_build, parallel)
         self.stages = [self.put]
         
     def put(self):
@@ -31,7 +31,7 @@ class table_three(BaseTable):
     connection_name = "name"
     requirements = [table_one, table_two]
     def __init__(self, __logger: Logger = None, /, db_connection: Connection = None, con_factory: connection_factory = None, log_consol=True, log_file=True, draw_progress=True, auto_build=False, parallel=False, file=None):
-        super().__init__(__logger, db_connection, con_factory, log_consol, log_file, draw_progress, auto_build, parallel, file)
+        super().__init__(__logger, db_connection, con_factory, log_consol, log_file, draw_progress, auto_build, parallel)
         self.stages = [self.put]
         
     def put(self):
