@@ -4,6 +4,7 @@ from .connection import Connection
 import pyodbc
 import oracledb
 import sqlalchemy
+import psycopg2
 
 
 def precooked_oracle_connection(username: str, password: str, con_line: str, encoding: str = 'UTF-8', logger = None, email = None):
@@ -70,3 +71,20 @@ def precooked_sqlalchemy_engine(con_type: str = None, username: str = None, pass
     if line:
         return Connection(logger=logger, df_connection=sqlalchemy.create_engine(line), email=email)
     return Connection(logger=logger, df_connection=sqlalchemy.create_engine(f'{con_type}://{username}:{password}@{server}/{database}?driver={driver};Trusted_Connection=yes{";" if args else ""}{";".join(*args)}', encoding=encoding), email=email)
+
+def precooked_postgresql_connection(username: str, password: str, host: str, database: str, logger = None, email = None):
+    """
+    Creates a pre-cooked PostgreSQL database connection.
+
+    Args:
+        username (str): The username for the database connection.
+        password (str): The password for the database connection.
+        host (str): The host address for the database connection.
+        database (str): The name of the database to connect to.
+        logger (Optional): An optional logger object for logging purposes.
+        email (Optional): An optional email address for sending notifications.
+
+    Returns:
+        Connection: A Connection object representing the database connection.
+    """
+    return Connection(logger=logger, df_connection=psycopg2.connect(user=username, password=password, host=host, database=database), email=email)

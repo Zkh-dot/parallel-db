@@ -4,7 +4,8 @@ requires = [
     "oracledb == 1.4.2",
     "pandas", 
     "rich == 13.7.0",
-    "SQLAlchemy==2.0.23"
+    "SQLAlchemy==2.0.23",
+    "psycopg2==2.9.9"
     ]
 build-backend = "hatchling.build"
 
